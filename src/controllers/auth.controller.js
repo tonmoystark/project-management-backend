@@ -1,4 +1,4 @@
-import User from "../models/user.model.js";
+import { User } from "../models/user.model.js";
 import { apiResponse } from "../utils/api-response.js";
 import { apiError } from "../utils/api-error.js";
 import { asyncHandler } from "../utils/async-handler.js";
@@ -6,7 +6,7 @@ import { emailVerificationMailgenContent, sendMail } from "../utils/mail.js";
 
 const generateAccessandRefreshToken = async (userID) => {
   try {
-    const user = await User.findbyId(userID);
+    const user = await User.findById(userID);
 
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
@@ -20,7 +20,7 @@ const generateAccessandRefreshToken = async (userID) => {
   }
 };
 
-const registerUser = asyncHandler(async (req, res, next) => {
+const registerUser = asyncHandler(async (req, res) => {
   const { username, email, password, role } = req.body;
 
   const existedUser = await User.findOne({
@@ -56,7 +56,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
     ),
   });
 
-  const createdUser = await User.findbyId(user._id).select(
+  const createdUser = await User.findById(user._id).select(
     "-password -emailVerificationToken -emailVerificationExpiry",
   );
 
