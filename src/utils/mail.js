@@ -6,7 +6,7 @@ const sendMail = async (options) => {
     theme: "default",
     product: {
       name: "Project Management App",
-      link: "https://taskmanahegerlink.com",
+      link: "https://taskmanagerlink.com",
     },
   });
 
