@@ -82,13 +82,13 @@ const login = asyncHandler(async (req, res) => {
     throw new apiError(400, "email  is required");
   }
 
-  const user = await User.find({ email });
+  const user = await User.findOne({ email });
 
   if (!user) {
     throw new apiError(404, "User not found, Need registration");
   }
 
-  const isValidPassword = await user.isPasswordValid(password);
+  const isValidPassword = await user.isPasswordValid(password.toString());
 
   if (!isValidPassword) {
     throw new apiError(401, "Invalid credentials");
