@@ -26,3 +26,15 @@ export const validateRegisterUser = () => {
     //   .withMessage("Password must be strong"),
   ];
 };
+
+export const validateLoginUser = () => {
+  return [
+    body("email")
+      .trim()
+      .isEmail()
+      .withMessage("Email is not valid")
+      .notEmpty()
+      .withMessage("Email is required"),
+    body("password").isEmpty().withMessage("Password is required"),
+  ];
+};

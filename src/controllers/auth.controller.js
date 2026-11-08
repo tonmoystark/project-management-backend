@@ -75,4 +75,49 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser };
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email) {
+    throw new apiError(400, "email  is required");
+  }
+
+  const user = await User.find({ email });
+
+  if (!user) {
+    throw new apiError(404, "User not found, Need registration");
+  }
+
+  const isValidPassword = await user.isPasswordValid(password);
+
+  if (!isValidPassword) {
+    throw new apiError(401, "Invalid credentials");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessandRefreshToken(
+    user._id,
+  );
+
+  const loggedinUser = await User.findById(user._id).select(
+    "-password -emailVerificationToken -emailVerificationExpiry",
+  );
+
+  const optionsForCookie = {
+    httponly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("refreshToken", refreshToken, optionsForCookie)
+    .cookie("accessToken", accessToken, optionsForCookie)
+    .json(
+      new apiResponse(
+        200,
+        { user: loggedinUser, accessToken, refreshToken },
+        "User logged in successfully",
+      ),
+    );
+});
+
+export { registerUser, login };

@@ -1,12 +1,13 @@
 import express from "express";
 import cors from "cors";
-
+import cookieParser from "cookie-parser";
 const app = express();
 //basic configuration
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
+app.use(cookieParser());
 
 //cors configuration
 app.use(
@@ -20,6 +21,7 @@ app.use(
 
 import healthCheckRouter from "./routes/healthcheck.route.js";
 import authRouter from "./routes/auth.route.js";
+
 app.use("/api/v1/healthcheck", healthCheckRouter);
 app.use("/api/v1/auth", authRouter);
 app.get("/", (req, res) => res.send("Hello World!"));
