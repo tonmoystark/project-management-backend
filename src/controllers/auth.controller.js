@@ -3,6 +3,7 @@ import { apiResponse } from "../utils/api-response.js";
 import { apiError } from "../utils/api-error.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { emailVerificationMailgenContent, sendMail } from "../utils/mail.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessandRefreshToken = async (userID) => {
   try {
@@ -171,16 +172,108 @@ const verifyEmail = asyncHandler(async (req, res) => {
     throw new apiError(404, "Token is invalid or expired");
   }
 
-  user.isVerified = true;
   user.emailVerificationToken = undefined;
   user.emailVerificationExpiry = undefined;
+
+  user.isVerified = true;
 
   await user.save({ validateBeforeSave: false });
 
   return res
     .status(200)
-    .json(new apiResponse(200, {}, "Email verified successfully"));
+    .json(
+      new apiResponse(200, { isVerified: true }, "Email verified successfully"),
+    );
+});
+const resendEmailVerification = asyncHandler(async (req, res) => {
+  const isLoggedinUser = await User.findById(req.user._id);
+
+  if (!isLoggedinUser) {
+    throw new apiError(404, "User not found");
+  }
+
+  if (isLoggedinUser.isVerified) {
+    throw new apiError(400, "User is already verified");
+  }
+
+  const { unHashedToken, hashedToken, expiryToken } =
+    user.generateTemporaryToken();
+
+  user.emailVerificationToken = hashedToken;
+  user.emailVerificationExpiry = expiryToken;
+
+  await user.save({ validateBeforeSave: false });
+
+  sendMail({
+    email: user?.email,
+    subject: "Please verify your email address",
+    mailgenContent: emailVerificationMailgenContent(
+      user?.username,
+      `${req.protocol}://${req.get("host")}/api/v1/auth/verify-email/${unHashedToken}`,
+    ),
+  });
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, {}, "Verification email sent successfully"));
+});
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const { incomingRefreshToken } =
+    req.cookies.refreshToken || req.body.refreshToken;
+
+  if (!incomingRefreshToken) {
+    throw new apiError(401, "Access Unauthorized");
+  }
+
+  try {
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+    );
+
+    const user = await User.findById(decodedToken._id);
+
+    if (!user) {
+      throw new apiError(401, "Token invalid");
+    }
+
+    if (user?.refreshToken !== incomingRefreshToken) {
+      throw new apiError(401, "Token invalid");
+    }
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    const { accessToken, refreshToken } = await generateAccessandRefreshToken(
+      user._id,
+    );
+
+    user.refreshToken = refreshToken;
+    user.save();
+
+    return res
+      .status(200)
+      .cookie("refreshToken", refreshToken, options)
+      .cookie("accessToken", accessToken, options)
+      .json(
+        new apiResponse(
+          200,
+          { accessToken, refreshToken },
+          "access Token refreshed",
+        ),
+      );
+  } catch (error) {}
 });
 // const getCurrentUser = asyncHandler(async (req, res) => {});
 
-export { registerUser, login, logoutUser, getCurrentUser, verifyEmail };
+export {
+  registerUser,
+  login,
+  logoutUser,
+  getCurrentUser,
+  verifyEmail,
+  resendEmailVerification,
+  refreshAccessToken,
+};
