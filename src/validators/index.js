@@ -79,14 +79,3 @@ export const validateChangePassword = () => {
       .withMessage("New password is required"),
   ];
 };
-
-export const verifyEmail = () => {
-  return [
-    body("email")
-      .isEmail()
-      .withMessage("Email is not valid")
-      .notEmpty()
-      .withMessage("Email is required"),
-  ];
-};
-
