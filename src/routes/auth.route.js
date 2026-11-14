@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  changeCurrentPassword,
   forgotPasswordRequest,
   getCurrentUser,
   login,
@@ -33,7 +34,7 @@ router
 
 router
   .route("/reset-password/:token")
-  .post(validateResetPassword, resetForgotPassword);
+  .post(validateResetPassword(), resetForgotPassword);
 
 // secured routes
 
@@ -41,7 +42,7 @@ router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/current-user").post(verifyJWT, getCurrentUser);
 router
   .route("/change-password")
-  .post(validateChangePassword(), validate, getCurrentUser);
+  .post(validateChangePassword(), validate, changeCurrentPassword);
 
 router
   .route("/resend-email-verification")

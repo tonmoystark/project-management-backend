@@ -39,6 +39,7 @@ export const validateLoginUser = () => {
   ];
 };
 
+
 export const validateForgotPassword = () => {
   return [
     body("email")
