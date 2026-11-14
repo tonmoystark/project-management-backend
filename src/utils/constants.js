@@ -4,7 +4,7 @@ export const userRolesEnum = {
   MEMBER: "member",
 };
 
-export const avalableUsers = Object.values(userRolesEnum);
+export const availableUsers = Object.values(userRolesEnum);
 
 export const taskStatus = {
   TODO: "todo",
@@ -12,4 +12,4 @@ export const taskStatus = {
   DONE: "done",
 };
 
-export const avalableTaskStatus = Object.values(taskStatus);
+export const availableTaskStatus = Object.values(taskStatus);
