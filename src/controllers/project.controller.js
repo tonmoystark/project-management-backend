@@ -45,13 +45,23 @@ const updateProject = asyncHandler(async (req, res) => {
     },
   );
 
-  if (!project) throw new apiError(404, "project not found");
+  if (!updateProject) throw new apiError(404, "project not found");
 
   return res
     .status(200)
     .apiResponse(200, updateProject, "project updated successfully");
 });
-const deleteProject = asyncHandler(async (req, res) => {});
+const deleteProject = asyncHandler(async (req, res) => {
+  const { projectId } = req.params;
+
+  const deleteProject = await project.findByIdAndDelete(projectId);
+
+  if (!deleteProject) throw new apiError(404, "project not found");
+
+  return res
+    .status(200)
+    .apiResponse(200, deleteProject, "project deleted successfully");
+});
 const addMembersToProject = asyncHandler(async (req, res) => {});
 const getProjectMembers = asyncHandler(async (req, res) => {});
 const updateMemberRole = asyncHandler(async (req, res) => {});
