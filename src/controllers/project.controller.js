@@ -30,7 +30,27 @@ const createProject = asyncHandler(async (req, res) => {
     .status(201)
     .json(new apiResponse(201, project, "project created successfully"));
 });
-const updateProject = asyncHandler(async (req, res) => {});
+const updateProject = asyncHandler(async (req, res) => {
+  const { name, description } = req.body;
+  const { projectId } = req.params;
+
+  const updateProject = await project.findByIdAndUpdate(
+    projectId,
+    {
+      name,
+      description,
+    },
+    {
+      new: true,
+    },
+  );
+
+  if (!project) throw new apiError(404, "project not found");
+
+  return res
+    .status(200)
+    .apiResponse(200, updateProject, "project updated successfully");
+});
 const deleteProject = asyncHandler(async (req, res) => {});
 const addMembersToProject = asyncHandler(async (req, res) => {});
 const getProjectMembers = asyncHandler(async (req, res) => {});
