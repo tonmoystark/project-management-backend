@@ -86,7 +86,7 @@ export const validateCreateProject = () => {
     body("description").optional(),
   ];
 };
-export const addMemberToProjectValidator = () => {
+export const validateAddMemberToProject = () => {
   return [
     body("email")
       .notEmpty()
@@ -96,6 +96,22 @@ export const addMemberToProjectValidator = () => {
     body("role")
       .isEmpty()
       .withMessage("role cannot be empty")
+      .isIn(availableUsers)
+      .withMessage("role is invalid"),
+  ];
+};
+export const validateUpdateProject = () => {
+  return [
+    body("name").notEmpty().withMessage("Name can not be empty"),
+    body("description").optional(),
+  ];
+};
+
+export const validateUpdateMemberRole = () => {
+  return [
+    body("newRole")
+      .isEmpty()
+      .withMessage("Role can not be empty")
       .isIn(availableUsers)
       .withMessage("role is invalid"),
   ];
