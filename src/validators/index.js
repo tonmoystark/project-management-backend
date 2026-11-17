@@ -1,5 +1,5 @@
 import { body } from "express-validator";
-
+import { availableUsers } from "../utils/constants.js";
 export const validateRegisterUser = () => {
   return [
     body("email")
@@ -39,7 +39,6 @@ export const validateLoginUser = () => {
   ];
 };
 
-
 export const validateForgotPassword = () => {
   return [
     body("email")
@@ -78,5 +77,26 @@ export const validateChangePassword = () => {
       // .withMessage("Password must be strong"),
       .notEmpty()
       .withMessage("New password is required"),
+  ];
+};
+
+export const validateCreateProject = () => {
+  return [
+    body("name").notEmpty().withMessage("Name can not be empty"),
+    body("description").optional(),
+  ];
+};
+export const addMemberToProjectValidator = () => {
+  return [
+    body("email")
+      .notEmpty()
+      .withMessage("email can not be empty")
+      .isEmail()
+      .withMessage("it should be an email"),
+    body("role")
+      .isEmpty()
+      .withMessage("role cannot be empty")
+      .isIn(availableUsers)
+      .withMessage("role is invalid"),
   ];
 };
