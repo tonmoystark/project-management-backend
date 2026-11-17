@@ -3,7 +3,11 @@ import { apiResponse } from "../utils/api-response";
 import { asyncHandler } from "../utils/async-handler";
 import { project, project } from "../models/project.model.js";
 import { User } from "../models/user.model.js";
-import { projectMember, projectMember } from "../models/projectMember.model.js";
+import {
+  projectMember,
+  projectMember,
+  projectMember,
+} from "../models/projectMember.model.js";
 import mongoose from "mongoose";
 import { availableUsers, userRolesEnum } from "../utils/constants.js";
 
@@ -233,7 +237,24 @@ const updateMemberRole = asyncHandler(async (req, res) => {
     .status(200)
     .json(new apiResponse(200, updatedRole, "memeber role updated"));
 });
-const deleteMember = asyncHandler(async (req, res) => {});
+const deleteMember = asyncHandler(async (req, res) => {
+  const { projectId, userId } = req.params;
+
+  const projectMember = await projectMember.findOne({
+    user: mongoose.Types.ObjectId(userId),
+    project: mongoose.Types.ObjectId(projectId),
+  });
+
+  if (!projectMember) throw new apiError(400, "member not found");
+
+  const deleteMember = await projectMember.findByIdAndUpdate(projectMember._id);
+
+  if (!deleteMember) throw new apiError(400, "member not found");
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, {}, "member deleted successfully"));
+});
 
 export {
   getProjects,
