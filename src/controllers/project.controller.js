@@ -1,13 +1,9 @@
 import { apiError } from "../utils/api-error";
 import { apiResponse } from "../utils/api-response";
 import { asyncHandler } from "../utils/async-handler";
-import { project, project } from "../models/project.model.js";
+import { project } from "../models/project.model.js";
 import { User } from "../models/user.model.js";
-import {
-  projectMember,
-  projectMember,
-  projectMember,
-} from "../models/projectMember.model.js";
+import { projectMember } from "../models/projectMember.model.js";
 import mongoose from "mongoose";
 import { availableUsers, userRolesEnum } from "../utils/constants.js";
 
@@ -84,8 +80,8 @@ const createProject = asyncHandler(async (req, res) => {
   });
 
   await projectMember.create({
-    project: mongoose.Types.ObjectId(project._id),
-    user: mongoose.Types.ObjectId(req.user._id),
+    project: new mongoose.Types.ObjectId(project._id),
+    user: new mongoose.Types.ObjectId(req.user._id),
     role: userRolesEnum.ADMIN,
   });
 
