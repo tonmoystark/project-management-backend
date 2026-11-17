@@ -1,8 +1,8 @@
 import { apiError } from "../utils/api-error";
 import { apiResponse } from "../utils/api-response";
 import { asyncHandler } from "../utils/async-handler";
-import { project } from "../models/project.model.js";
-import { user } from "../models/user.model.js";
+import { project, project } from "../models/project.model.js";
+import { User } from "../models/user.model.js";
 import { projectMember } from "../models/projectMember.model.js";
 import mongoose from "mongoose";
 import { userRolesEnum } from "../utils/constants.js";
@@ -121,8 +121,88 @@ const deleteProject = asyncHandler(async (req, res) => {
     .status(200)
     .apiResponse(200, deleteProject, "project deleted successfully");
 });
-const addMembersToProject = asyncHandler(async (req, res) => {});
-const getProjectMembers = asyncHandler(async (req, res) => {});
+const addMembersToProject = asyncHandler(async (req, res) => {
+  const { email, role } = req.body;
+  const { projectId } = req.params;
+
+  const user = await User.findOne({ email });
+
+  if (!user) throw new apiError(404, "user not found");
+
+  await projectMember.findByIdAndUpdate(
+    {
+      user: new mongoose.Types.ObjectId(user._id),
+      project: new mongoose.Types.ObjectId(projectId),
+    },
+    {
+      user: new mongoose.Types.ObjectId(user._id),
+      project: new mongoose.Types.ObjectId(projectId),
+      role,
+    },
+    {
+      new: true,
+      upsert: true,
+    },
+  );
+
+  return res
+    .status(201)
+    .json(new apiResponse(201, {}, "member added successfully"));
+});
+const getProjectMembers = asyncHandler(async (req, res) => {
+  const { projectId } = req.params;
+
+  const project = await project.findById(projectId);
+
+  if (!project) throw new apiError(404, "project not found");
+
+  const projectMembers = await projectMember.aggregate([
+    {
+      $match: {
+        project: new mongoose.Types.ObjectId(projectId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user",
+        pipeline: {
+          $project: {
+            avatar: 1,
+            _id: 1,
+            fullname: 1,
+            email: 1,
+            username: 1,
+          },
+        },
+      },
+    },
+
+    {
+      $addFields: {
+        user: {
+          $arrayElemAt: ["$user", 0],
+        },
+      },
+    },
+
+    {
+      $project: {
+        project: 1,
+        user: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        _id: 0,
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, projectMembers, "project members fetched"));
+});
 const updateMemberRole = asyncHandler(async (req, res) => {});
 const deleteMember = asyncHandler(async (req, res) => {});
 
