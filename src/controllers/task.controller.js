@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import { availableUsers, userRolesEnum } from "../utils/constants.js";
 import { task } from "../models/task.model.js";
 
-const getTasks = asyncHandler(async (res, req) => {
+const getTasks = asyncHandler(async (req, res) => {
   const { projectId } = req.params;
 
   if (!project) throw new apiError(400, "project not found");
@@ -19,8 +19,10 @@ const getTasks = asyncHandler(async (res, req) => {
 
   return res.status(200).json(new apiResponse(200, tasks, "tasks fetched"));
 });
-const getTaskId = asyncHandler(async (res, req) => {});
-const createTask = asyncHandler(async (res, req) => {
+const getTaskId = asyncHandler(async (req, res) => {});
+
+
+const createTask = asyncHandler(async (req, res) => {
   const { name, content, status, assignedTo, assignedBy } = req.body;
   const { projectId } = req.params;
 
@@ -50,11 +52,55 @@ const createTask = asyncHandler(async (res, req) => {
   return res.status(201).json(new apiResponse(201, task, "new task created"));
 });
 
-const updateTask = asyncHandler(async (res, req) => {});
-const deleteTask = asyncHandler(async (res, req) => {});
-const createSubTask = asyncHandler(async (res, req) => {});
-const updateSubTask = asyncHandler(async (res, req) => {});
-const deleteSubTask = asyncHandler(async (res, req) => {});
+const updateTask = asyncHandler(async (req, res) => {
+  const { name, content, status, assignedTo } = req.body;
+  const { taskId, projectId } = req.params;
+
+  const existingProject = await project.findById(projectId);
+  if (!existingProject) throw new apiError(404, "Project not found");
+
+  const files = req.files || [];
+  const newAttachments = files.map((file) => {
+    return {
+      url: `${process.env.SERVER_URL}/images/${file.originalname}`,
+      mimetype: file.mimetype,
+      size: file.size,
+    };
+  });
+
+  const updateData = {};
+  if (name !== undefined) updateData.name = name;
+  if (content !== undefined) updateData.content = content;
+  if (status !== undefined) updateData.status = status;
+  if (assignedTo !== undefined) {
+    updateData.assignedTo = assignedTo ? new mongoose.Types.ObjectId(assignedTo) : null;
+  }
+
+  const updateQuery = { $set: updateData };
+  if (newAttachments.length > 0) {
+    updateQuery.$push = { attatchments: { $each: newAttachments } };
+  }
+
+  const updatedTask = await task
+    .findOneAndUpdate(
+      { _id: taskId, project: projectId },
+      updateQuery,
+      { new: true }
+    )
+    .populate("assignedTo", "username avatar fullname");
+
+  if (!updatedTask) throw new apiError(404, "Task not found in this project");
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, updatedTask, "Task updated successfully"));
+});
+const deleteTask = asyncHandler(async (req, res) => {
+  
+});
+const createSubTask = asyncHandler(async (req, res) => {});
+const updateSubTask = asyncHandler(async (req, res) => {});
+const deleteSubTask = asyncHandler(async (req, res) => {});
 
 export {
   getTasks,
