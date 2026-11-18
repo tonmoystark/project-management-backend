@@ -25,6 +25,12 @@ const taskSchema = new mongoose.Schema(
       enum: availableTaskStatus,
       default: taskStatus.TODO,
     },
+
+    project:{
+      type: Schema.Types.ObjectId(),
+      ref: "project",
+      required: true
+    },
     attatchments: {
       type: [
         {
