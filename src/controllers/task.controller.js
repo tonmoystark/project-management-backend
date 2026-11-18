@@ -21,7 +21,6 @@ const getTasks = asyncHandler(async (req, res) => {
 });
 const getTaskId = asyncHandler(async (req, res) => {});
 
-
 const createTask = asyncHandler(async (req, res) => {
   const { name, content, status, assignedTo, assignedBy } = req.body;
   const { projectId } = req.params;
@@ -73,7 +72,9 @@ const updateTask = asyncHandler(async (req, res) => {
   if (content !== undefined) updateData.content = content;
   if (status !== undefined) updateData.status = status;
   if (assignedTo !== undefined) {
-    updateData.assignedTo = assignedTo ? new mongoose.Types.ObjectId(assignedTo) : null;
+    updateData.assignedTo = assignedTo
+      ? new mongoose.Types.ObjectId(assignedTo)
+      : null;
   }
 
   const updateQuery = { $set: updateData };
@@ -82,11 +83,9 @@ const updateTask = asyncHandler(async (req, res) => {
   }
 
   const updatedTask = await task
-    .findOneAndUpdate(
-      { _id: taskId, project: projectId },
-      updateQuery,
-      { new: true }
-    )
+    .findOneAndUpdate({ _id: taskId, project: projectId }, updateQuery, {
+      new: true,
+    })
     .populate("assignedTo", "username avatar fullname");
 
   if (!updatedTask) throw new apiError(404, "Task not found in this project");
@@ -96,7 +95,18 @@ const updateTask = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, updatedTask, "Task updated successfully"));
 });
 const deleteTask = asyncHandler(async (req, res) => {
-  
+  const { taskId, projectId } = req.params;
+
+  const existingProject = await project.findById(projectId);
+  if (!existingProject) throw new apiError(404, "project not found");
+
+  await task.findByIdAndDelete({
+    _id: taskId,
+    project: projectId,
+  });
+
+  return res.status(200);
+  json(new apiResponse(200, {}, "task deleted successfully"));
 });
 const createSubTask = asyncHandler(async (req, res) => {});
 const updateSubTask = asyncHandler(async (req, res) => {});
