@@ -5,6 +5,7 @@ import { project } from "../models/project.model.js";
 import mongoose from "mongoose";
 import { availableUsers, userRolesEnum } from "../utils/constants.js";
 import { task } from "../models/task.model.js";
+import { subTask } from "../models/subTask.model.js";
 
 const getTasks = asyncHandler(async (req, res) => {
   const { projectId } = req.params;
@@ -186,7 +187,31 @@ const deleteTask = asyncHandler(async (req, res) => {
   return res.status(200);
   json(new apiResponse(200, {}, "task deleted successfully"));
 });
-const createSubTask = asyncHandler(async (req, res) => {});
+const createSubTask = asyncHandler(async (req, res) => {
+  const { title, content } = req.body;
+  const { taskId, projectId } = req.params;
+
+  const foundProject = await project.findById(projectId);
+  if (!foundProject) throw new apiError(404, "project not found");
+
+  const foundTask = await task.findOne({
+    _id: new mongoose.Types.ObjectId(taskId),
+    project: new mongoose.Types.ObjectId(projectId),
+  });
+  if (!foundTask) throw new apiError(404, "task not found");
+
+  const createdSubTask = await subTask.create({
+    title,
+    content,
+    task: new mongoose.Types.ObjectId(taskId),
+  });
+
+  return res
+    .status(201)
+    .json(
+      new apiResponse(201, createdSubTask, "subtask created successfully."),
+    );
+});
 const updateSubTask = asyncHandler(async (req, res) => {});
 const deleteSubTask = asyncHandler(async (req, res) => {});
 
