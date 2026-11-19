@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import {
   validateProjectPermission,
+  validateTaskPermission,
   verifyJWT,
 } from "../middlewares/auth.middleware.js";
 
@@ -30,7 +31,10 @@ router
   .post(
     validateCreateTask(),
     validate,
-    validateProjectPermission([userRolesEnum.ADMIN]),
+    validateProjectPermission([
+      userRolesEnum.ADMIN,
+      userRolesEnum.PROJECT_ADMIN,
+    ]),
     createTask,
   );
 
@@ -40,10 +44,23 @@ router
   .put(
     validateUpdateTask(),
     validate,
-    validateProjectPermission([userRolesEnum.ADMIN]),
+    validateProjectPermission([
+      userRolesEnum.ADMIN,
+      userRolesEnum.PROJECT_ADMIN,
+    ]),
+    validateTaskPermission([userRolesEnum.ADMIN, userRolesEnum.PROJECT_ADMIN], {
+      allowAssignee: true,
+    }),
     updateTask,
   )
-  .delete(validateProjectPermission([userRolesEnum.ADMIN]), deleteTask);
+  .delete(
+    validateProjectPermission([
+      userRolesEnum.ADMIN,
+      userRolesEnum.PROJECT_ADMIN,
+    ]),
+    validateTaskPermission([userRolesEnum.ADMIN, userRolesEnum.PROJECT_ADMIN]),
+    deleteTask,
+  );
 
 router
   .route("/:taskId/subtask")
