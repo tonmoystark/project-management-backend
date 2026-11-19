@@ -1,5 +1,5 @@
 import { body } from "express-validator";
-import { availableUsers } from "../utils/constants.js";
+import { availableTaskStatus, availableUsers } from "../utils/constants.js";
 export const validateRegisterUser = () => {
   return [
     body("email")
@@ -114,5 +114,39 @@ export const validateUpdateMemberRole = () => {
       .withMessage("Role can not be empty")
       .isIn(availableUsers)
       .withMessage("role is invalid"),
+  ];
+};
+
+// task controller validators
+
+export const validateCreateTask = () => {
+  return [
+    body("name").notEmpty().withMessage("Title can not be empty"),
+    body("content").optional(),
+    body("status")
+      .isEmpty()
+      .withMessage("status can not be empty")
+      .isIn(availableTaskStatus)
+      .withMessage("status is invalid"),
+    body("assignedTo")
+      .isEmpty()
+      .withMessage("asignee can not be empty")
+      .isAlphanumeric()
+      .withMessage("asignee should be an alphanumeric string"),
+  ];
+};
+
+export const validateUpdateTask = () => {
+  return [
+    body("name").optional(),
+    body("content").optional(),
+    body("status")
+      .optional()
+      .isIn(availableTaskStatus)
+      .withMessage("status is invalid"),
+    body("assignedTo")
+      .optional()
+      .isAlphanumeric()
+      .withMessage("asignee should be an alphanumeric string"),
   ];
 };

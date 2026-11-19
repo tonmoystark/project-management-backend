@@ -101,7 +101,7 @@ const getTaskId = asyncHandler(async (req, res) => {
 });
 
 const createTask = asyncHandler(async (req, res) => {
-  const { name, content, status, assignedTo, assignedBy } = req.body;
+  const { name, content, status, assignedTo } = req.body;
   const { projectId } = req.params;
 
   const project = await project.findById(projectId);
