@@ -19,7 +19,85 @@ const getTasks = asyncHandler(async (req, res) => {
 
   return res.status(200).json(new apiResponse(200, tasks, "tasks fetched"));
 });
-const getTaskId = asyncHandler(async (req, res) => {});
+const getTaskId = asyncHandler(async (req, res) => {
+  const { taskId } = req.params;
+
+  const foundTask = await task.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(taskId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "assignedTo",
+        foreignField: "_id",
+        as: "assignedTo",
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              username: 1,
+              fullName: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "subtasks",
+        localField: "_id",
+        foreignField: "task",
+        as: "subTasks",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "createdBy",
+              foreignField: "_id",
+              as: "createdBy",
+              pipeline: [
+                {
+                  $project: {
+                    _id: 1,
+                    username: 1,
+                    fullName: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              createdBy: {
+                $arrayElemAt: ["$createdBy", 0],
+              },
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        assignedTo: {
+          $arrayElemAt: ["$assignedTo", 0],
+        },
+      },
+    },
+  ]);
+
+  if (!foundTask || foundTask.length === 0) {
+    throw new apiError(404, "task not found");
+  }
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, foundTask[0], "task fetched successfully"));
+});
 
 const createTask = asyncHandler(async (req, res) => {
   const { name, content, status, assignedTo, assignedBy } = req.body;
