@@ -44,9 +44,9 @@ router
 
 router
   .route("/:projectId/members")
-  .get(validateProjectPermission([availableUsers]), getProjectMembers)
+  .get(validateProjectPermission(availableUsers), getProjectMembers)
   .post(
-    validateProjectPermission([availableUsers]),
+    validateProjectPermission(availableUsers),
     validateAddMemberToProject(),
     validate,
     addMembersToProject,

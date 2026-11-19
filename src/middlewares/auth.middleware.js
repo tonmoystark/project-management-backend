@@ -54,4 +54,5 @@ export const validateProjectPermission = (role = []) => {
 
     next();
   };
+  return;
 };
