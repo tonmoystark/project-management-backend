@@ -212,8 +212,35 @@ const createSubTask = asyncHandler(async (req, res) => {
       new apiResponse(201, createdSubTask, "subtask created successfully."),
     );
 });
-const updateSubTask = asyncHandler(async (req, res) => {});
-const deleteSubTask = asyncHandler(async (req, res) => {});
+const updateSubTask = asyncHandler(async (req, res) => {
+  const { title, content } = req.body;
+  const { taskId, subTaskId } = req.params;
+
+  const updateFields = {};
+  if (title !== undefined) updateFields.title = title;
+  if (content !== undefined) updateFields.content = content;
+
+  const updatedSubTask = await subTask.findByIdAndUpdate(
+    {
+      _id: new mongoose.Types.ObjectId(subTaskId),
+    task: new mongoose.Types.ObjectId(taskId),
+    },
+    { $set: updateFields },
+    { new: true },
+  );
+
+  if(!updatedSubTask) throw new apiError(404, "subtask not found")
+
+  return res
+    .status(200)
+    .json(
+      new apiResponse(200, updatedSubTask, "sub task updated successfully"),
+    );
+});
+const deleteSubTask = asyncHandler(async (req, res) => {
+  
+
+});
 
 export {
   getTasks,
