@@ -7,9 +7,13 @@ import {
 
 import { validate } from "../middlewares/validator.middleware.js";
 import { availableUsers, userRolesEnum } from "../utils/constants.js";
-import { validateCreateSubTask, validateCreateTask, validateUpdateTask } from "../validators/index.js";
 import {
-    createSubTask,
+  validateCreateSubTask,
+  validateCreateTask,
+  validateUpdateTask,
+} from "../validators/index.js";
+import {
+  createSubTask,
   createTask,
   deleteTask,
   getTaskId,
@@ -17,8 +21,7 @@ import {
   updateTask,
 } from "../controllers/task.controller.js";
 
-
-const router = Router();
+const router = Router({ mergeParams: true });
 router.use(verifyJWT);
 
 router
@@ -27,7 +30,8 @@ router
   .post(
     validateCreateTask(),
     validate,
-    validateProjectPermission([userRolesEnum.ADMIN], createTask),
+    validateProjectPermission([userRolesEnum.ADMIN]),
+    createTask,
   );
 
 router
@@ -44,6 +48,11 @@ router
 router
   .route("/:taskId/subtask")
   .get(validateProjectPermission(availableUsers), getSubTask)
-  .post(validateCreateSubTask(), validate, validateProjectPermission ,createSubTask)
+  .post(
+    validateCreateSubTask(),
+    validate,
+    validateProjectPermission(),
+    createSubTask,
+  );
 
 export default router;

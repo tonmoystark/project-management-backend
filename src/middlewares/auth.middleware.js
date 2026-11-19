@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { projectMember } from "../models/projectMember.model.js";
+import { task } from "../models/task.model.js";
 import { User } from "../models/user.model.js";
 import { apiError } from "../utils/api-error.js";
 import jwt from "jsonwebtoken";
@@ -30,7 +31,7 @@ export const verifyJWT = async (req, res, next) => {
 };
 
 export const validateProjectPermission = (role = []) => {
-  async (req, res, next) => {
+  return async (req, res, next) => {
     const { projectId } = req.params;
 
     if (!projectId) throw new apiError(400, "project not found");
@@ -54,5 +55,44 @@ export const validateProjectPermission = (role = []) => {
 
     next();
   };
-  return;
+};
+
+export const validateTaskPermission = (
+  allowedRoles = [],
+  { allowAssignee = false } = {},
+) => {
+  return async (req, res, next) => {
+    const { projectId, taskId } = req.params;
+
+    if (
+      !mongoose.Types.ObjectId.isValid(projectId) ||
+      !mongoose.Types.ObjectId.isValid(taskId)
+    ) {
+      throw new apiError(400, "Invalid project ID or task ID");
+    }
+
+    const foundTask = await task.findOne({
+      _id: new mongoose.Types.ObjectId(taskId),
+      project: new mongoose.Types.ObjectId(projectId),
+    });
+
+    if (!foundTask) {
+      throw new apiError(404, "Task not found in this project");
+    }
+
+    const hasRolePermission = allowedRoles.includes(req.user.role);
+    const isAssignee =
+      allowAssignee &&
+      foundTask.assignedTo?.toString() === req.user._id.toString();
+
+    if (!hasRolePermission && !isAssignee) {
+      throw new apiError(
+        403,
+        "You do not have the authority to perform this action on this task",
+      );
+    }
+
+    req.task = foundTask;
+    next();
+  };
 };
