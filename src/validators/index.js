@@ -121,8 +121,8 @@ export const validateUpdateMemberRole = () => {
 
 export const validateCreateTask = () => {
   return [
-    body("name").notEmpty().withMessage("Title can not be empty"),
-    body("content").optional(),
+    body("name").notEmpty().withMessage("Title can not be empty").trim(),
+    body("content").optional().trim(),
     body("status")
       .isEmpty()
       .withMessage("status can not be empty")
@@ -138,15 +138,28 @@ export const validateCreateTask = () => {
 
 export const validateUpdateTask = () => {
   return [
-    body("name").optional(),
-    body("content").optional(),
+    body("name").optional().trim(),
+    body("content").optional().trim(),
     body("status")
       .optional()
       .isIn(availableTaskStatus)
-      .withMessage("status is invalid"),
+      .withMessage("status is invalid")
+      .trim(),
     body("assignedTo")
       .optional()
       .isAlphanumeric()
-      .withMessage("asignee should be an alphanumeric string"),
+      .withMessage("asignee should be an alphanumeric string")
+      .trim(),
   ];
+};
+
+export const validateCreateSubTask = () => {
+  return [
+    body("title").notEmpty().withMessage("title cannot be empty").trim(),
+    body("content").optional().trim(),
+  ];
+};
+
+export const validateUpdateSubTask = () => {
+  return [body("title").optional().trim(), body("content").optional().trim()];
 };
