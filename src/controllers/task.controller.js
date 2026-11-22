@@ -184,8 +184,9 @@ const deleteTask = asyncHandler(async (req, res) => {
     project: projectId,
   });
 
-  return res.status(200);
-  json(new apiResponse(200, {}, "task deleted successfully"));
+  return res
+    .status(200)
+    .json(new apiResponse(200, {}, "task deleted successfully"));
 });
 
 const getSubTask = asyncHandler(async (req, res) => {
@@ -315,6 +316,7 @@ export {
   createTask,
   updateTask,
   deleteTask,
+  getSubTask,
   createSubTask,
   updateSubTask,
   deleteSubTask,
