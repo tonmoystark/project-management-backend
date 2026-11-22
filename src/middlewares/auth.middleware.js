@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { projectMember } from "../models/projectMember.model.js";
 import { task } from "../models/task.model.js";
+import { note } from "../models/note.model.js";
 import { User } from "../models/user.model.js";
 import { apiError } from "../utils/api-error.js";
 import jwt from "jsonwebtoken";
@@ -93,6 +94,42 @@ export const validateTaskPermission = (
     }
 
     req.task = foundTask;
+    next();
+  };
+};
+
+export const validateNotePermission = (allowedRoles = []) => {
+  return async (req, res, next) => {
+    const { projectId, noteId } = req.params;
+
+    if (
+      !mongoose.Types.ObjectId.isValid(projectId) ||
+      !mongoose.Types.ObjectId.isValid(noteId)
+    ) {
+      throw new apiError(400, "Invalid project ID or note ID");
+    }
+
+    const foundNote = await note.findOne({
+      _id: new mongoose.Types.ObjectId(noteId),
+      project: new mongoose.Types.ObjectId(projectId),
+    });
+
+    if (!foundNote) {
+      throw new apiError(404, "Note not found in this project");
+    }
+
+    const isOwner =
+      foundNote.createdBy?.toString() === req.user._id.toString();
+    const hasRolePermission = allowedRoles.includes(req.user.role);
+
+    if (!isOwner && !hasRolePermission) {
+      throw new apiError(
+        403,
+        "You do not have the authority to perform this action on this note",
+      );
+    }
+
+    req.note = foundNote;
     next();
   };
 };
