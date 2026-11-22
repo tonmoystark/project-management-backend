@@ -33,3 +33,22 @@ const createNote = asyncHandler(async (req, res) => {
 
   return apiResponse(200, creatednote, "Note created successfully");
 });
+
+const getNote = asyncHandler(async (req, res) => {
+  const { noteId } = req.params;
+  if (!isValidMongoId(noteId)) {
+    throw new apiError(400, "Invalid note id");
+  }
+
+  const noteExists = await note.findById(noteId);
+  if (!noteExists) {
+    throw new apiError(400, "Invalid note id");
+  }
+  
+  const fetchedNote = await note.findById(noteId).select("-project -createdBy");
+  if (!fetchedNote) {
+    throw new apiError(400, "Failed to fetch note");
+  }
+
+  return apiResponse(200, fetchedNote, "Note fetched successfully");
+});
