@@ -163,3 +163,11 @@ export const validateCreateSubTask = () => {
 export const validateUpdateSubTask = () => {
   return [body("title").optional().trim(), body("content").optional().trim()];
 };
+
+export const validateCreateNote = () => {
+  return [body("title").notEmpty().withMessage("title cannot be empty").trim()];
+};
+
+export const validateUpdateNote = () => {
+  return [body("title").optional().trim()];
+};
