@@ -11,14 +11,18 @@ import { availableUsers, userRolesEnum } from "../utils/constants.js";
 import {
   validateCreateSubTask,
   validateCreateTask,
+  validateUpdateSubTask,
   validateUpdateTask,
 } from "../validators/index.js";
 import {
   createSubTask,
   createTask,
+  deleteSubTask,
   deleteTask,
+  getSubTask,
   getTaskId,
   getTasks,
+  updateSubTask,
   updateTask,
 } from "../controllers/task.controller.js";
 
@@ -70,6 +74,25 @@ router
     validate,
     validateProjectPermission(),
     createSubTask,
+  );
+
+router
+  .route("/:taskId/subtask/:subTaskId")
+  .put(
+    validateProjectPermission(availableUsers),
+    validateTaskPermission([userRolesEnum.ADMIN, userRolesEnum.PROJECT_ADMIN], {
+      allowAssignee: true,
+    }),
+    validateUpdateSubTask(),
+    validate,
+    updateSubTask,
+  )
+  .delete(
+    validateProjectPermission(availableUsers),
+    validateTaskPermission([userRolesEnum.ADMIN, userRolesEnum.PROJECT_ADMIN], {
+      allowAssignee: true,
+    }),
+    deleteSubTask,
   );
 
 export default router;
