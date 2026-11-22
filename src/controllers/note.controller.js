@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import { apiError } from "../utils/api-error";
-import { apiResponse } from "../utils/api-response";
-import { asyncHandler } from "../utils/async-handler";
+import { apiError } from "../utils/api-error.js";
+import { apiResponse } from "../utils/api-response.js";
+import { asyncHandler } from "../utils/async-handler.js";
 import { project } from "../models/project.model.js";
 import { note } from "../models/note.model.js";
 
@@ -9,7 +9,7 @@ const createNote = asyncHandler(async (req, res) => {
   const { projectId } = req.params;
   const { title } = req.body;
 
-  if (!isValidMongoId(projectId)) {
+  if (!mongoose.Types.ObjectId.isValid(projectId)) {
     throw new apiError(400, "Invalid project id");
   }
 
@@ -28,11 +28,13 @@ const createNote = asyncHandler(async (req, res) => {
     throw new apiError(400, "Failed to create note");
   }
 
-  const creatednote = await note
+  const createdNote = await note
     .findById(noteExists._id)
     .select("-project -createdBy");
 
-  return apiResponse(200, creatednote, "Note created successfully");
+  return res
+    .status(201)
+    .json(new apiResponse(201, createdNote, "Note created successfully"));
 });
 
 const getAllNotes = asyncHandler(async (req, res) => {
@@ -131,4 +133,81 @@ const getAllNotes = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, notes, "Notes fetched successfully"));
 });
 
-export { createNote, getAllNotes };
+const updateNote = asyncHandler(async (req, res) => {
+  const { projectId, noteId } = req.params;
+  const { title } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(noteId)) {
+    throw new apiError(400, "Invalid note ID");
+  }
+
+  if (projectId && !mongoose.Types.ObjectId.isValid(projectId)) {
+    throw new apiError(400, "Invalid project ID");
+  }
+
+  const filter = {
+    _id: new mongoose.Types.ObjectId(noteId),
+  };
+
+  if (projectId) {
+    filter.project = new mongoose.Types.ObjectId(projectId);
+  }
+
+  if (!req.note) {
+    filter.createdBy = new mongoose.Types.ObjectId(req.user._id);
+  }
+
+  const updatedNote = await note
+    .findOneAndUpdate(
+      filter,
+      { $set: { title } },
+      { new: true, runValidators: true },
+    )
+    .populate("createdBy", "username fullName avatar")
+    .populate("project", "name");
+
+  if (!updatedNote) {
+    throw new apiError(404, "Note not found");
+  }
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, updatedNote, "Note updated successfully"));
+});
+
+const deleteNote = asyncHandler(async (req, res) => {
+  const { projectId, noteId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(noteId)) {
+    throw new apiError(400, "Invalid note ID");
+  }
+
+  if (projectId && !mongoose.Types.ObjectId.isValid(projectId)) {
+    throw new apiError(400, "Invalid project ID");
+  }
+
+  const filter = {
+    _id: new mongoose.Types.ObjectId(noteId),
+  };
+
+  if (projectId) {
+    filter.project = new mongoose.Types.ObjectId(projectId);
+  }
+
+  if (!req.note) {
+    filter.createdBy = new mongoose.Types.ObjectId(req.user._id);
+  }
+
+  const deletedNote = await note.findOneAndDelete(filter);
+
+  if (!deletedNote) {
+    throw new apiError(404, "Note not found");
+  }
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, {}, "Note deleted successfully"));
+});
+
+export { createNote, getAllNotes, updateNote, deleteNote };
+
