@@ -16,7 +16,7 @@ export const validateRegisterUser = () => {
       .withMessage("Username is required")
       .isLowercase()
       .withMessage("Username must be lowercase"),
-    body("password").isEmpty().withMessage("Password is required"),
+    body("password").notEmpty().withMessage("Password is required"),
     //   .isStrongPassword({
     //     minLength: 8,
     //     minLowercase: 1,
@@ -35,7 +35,7 @@ export const validateLoginUser = () => {
       .withMessage("Email is not valid")
       .notEmpty()
       .withMessage("Email is required"),
-    body("password").isEmpty().withMessage("Password is required"),
+    body("password").notEmpty().withMessage("Password is required"),
   ];
 };
 
@@ -94,7 +94,7 @@ export const validateAddMemberToProject = () => {
       .isEmail()
       .withMessage("it should be an email"),
     body("role")
-      .isEmpty()
+      .notEmpty()
       .withMessage("role cannot be empty")
       .isIn(availableUsers)
       .withMessage("role is invalid"),
@@ -110,7 +110,7 @@ export const validateUpdateProject = () => {
 export const validateUpdateMemberRole = () => {
   return [
     body("newRole")
-      .isEmpty()
+      .notEmpty()
       .withMessage("Role can not be empty")
       .isIn(availableUsers)
       .withMessage("role is invalid"),
@@ -124,12 +124,12 @@ export const validateCreateTask = () => {
     body("name").notEmpty().withMessage("Title can not be empty").trim(),
     body("content").optional().trim(),
     body("status")
-      .isEmpty()
+      .notEmpty()
       .withMessage("status can not be empty")
       .isIn(availableTaskStatus)
       .withMessage("status is invalid"),
     body("assignedTo")
-      .isEmpty()
+      .notEmpty()
       .withMessage("asignee can not be empty")
       .isAlphanumeric()
       .withMessage("asignee should be an alphanumeric string"),

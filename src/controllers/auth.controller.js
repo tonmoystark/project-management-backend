@@ -139,7 +139,7 @@ const logoutUser = asyncHandler(async (req, res) => {
   );
 
   const options = {
-    httpsOnly: true,
+    httpOnly: true,
     secure: true,
   };
 

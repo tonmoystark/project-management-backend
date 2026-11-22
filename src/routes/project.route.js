@@ -61,3 +61,5 @@ router
     updateMemberRole,
   )
   .delete(validateProjectPermission([userRolesEnum.ADMIN]), deleteMember);
+
+export default router;

@@ -27,7 +27,7 @@ const taskSchema = new mongoose.Schema(
     },
 
     project:{
-      type: Schema.Types.ObjectId(),
+      type: Schema.Types.ObjectId,
       ref: "project",
       required: true
     },

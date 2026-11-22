@@ -6,10 +6,7 @@ import {
   verifyJWT,
 } from "../middlewares/auth.middleware.js";
 import { availableUsers } from "../utils/constants.js";
-import {
-  validateCreateNote,
-  validateUpdateNote,
-} from "../validators/index.js";
+import { validateCreateNote, validateUpdateNote } from "../validators/index.js";
 import {
   createNote,
   deleteNote,

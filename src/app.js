@@ -14,7 +14,7 @@ app.use(
   cors({
     origin: process.env.CORS_ORIGIN?.split(",") || "http://localhost:5173",
     credentials: true,
-    methdods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
@@ -29,7 +29,7 @@ app.use("/api/v1/healthcheck", healthCheckRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/projects", projectRouter);
 app.use("/api/v1/projects/:projectId/tasks", taskRouter);
-app.use("/api/v1/projects/:projectId/tasks/:taskId/notes", noteRouter);
+app.use("/api/v1/projects/:projectId/notes", noteRouter);
 
 
 app.get("/", (req, res) => res.send("Hello World!"));
