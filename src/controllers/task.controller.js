@@ -1,6 +1,6 @@
 import { apiError } from "../utils/api-error.js";
 import { apiResponse } from "../utils/api-response.js";
-import { asyncHandler } from "../utils/async-handler";
+import { asyncHandler } from "../utils/async-handler.js";
 import { project } from "../models/project.model.js";
 import mongoose from "mongoose";
 import { availableUsers, userRolesEnum } from "../utils/constants.js";
@@ -10,13 +10,14 @@ import { subTask } from "../models/subTask.model.js";
 const getTasks = asyncHandler(async (req, res) => {
   const { projectId } = req.params;
 
-  if (!project) throw new apiError(400, "project not found");
+  const existingProject = await project.findById(projectId);
+  if (!existingProject) throw new apiError(404, "project not found");
 
   const tasks = await task
     .find({
-      project: mongoose.Types.ObjectId(projectId),
+      project: new mongoose.Types.ObjectId(projectId),
     })
-    .populate("assignedTo", "username, avatar, fullname");
+    .populate("assignedTo", "username avatar fullName");
 
   return res.status(200).json(new apiResponse(200, tasks, "tasks fetched"));
 });
@@ -104,30 +105,34 @@ const createTask = asyncHandler(async (req, res) => {
   const { name, content, status, assignedTo } = req.body;
   const { projectId } = req.params;
 
-  const project = await project.findById(projectId);
+  const foundProject = await project.findById(projectId);
 
-  if (!project) throw new apiError(400, "project not found");
+  if (!foundProject) throw new apiError(400, "project not found");
   const files = req.files || [];
 
   const attatchments = files.map((file) => {
     return {
-      url: `${process.env.SERVER_URL}/images/${file.originalname}`,
-      mimetype: file.mimetype,
+      url: `${process.env.SERVER_URL}/images/${file.filename}`,
+      MimeType: file.mimetype,
       size: file.size,
     };
   });
 
-  const task = await task.create({
+  const newTask = await task.create({
     name,
     content,
-    assignedTo: assignedTo ? mongoose.Types.ObjectId(assignedTo) : undefined,
-    assignedBy: mongoose.Types.ObjectId(req.user._id),
-    project: mongoose.Types.ObjectId(projectId),
+    assignedTo: assignedTo
+      ? new mongoose.Types.ObjectId(assignedTo)
+      : undefined,
+    assignedBy: new mongoose.Types.ObjectId(req.user._id),
+    project: new mongoose.Types.ObjectId(projectId),
     status,
     attatchments,
   });
 
-  return res.status(201).json(new apiResponse(201, task, "new task created"));
+  return res
+    .status(201)
+    .json(new apiResponse(201, newTask, "new task created"));
 });
 
 const updateTask = asyncHandler(async (req, res) => {
@@ -140,8 +145,8 @@ const updateTask = asyncHandler(async (req, res) => {
   const files = req.files || [];
   const newAttachments = files.map((file) => {
     return {
-      url: `${process.env.SERVER_URL}/images/${file.originalname}`,
-      mimetype: file.mimetype,
+      url: `${process.env.SERVER_URL}/images/${file.filename}`,
+      MimeType: file.mimetype,
       size: file.size,
     };
   });
@@ -165,7 +170,7 @@ const updateTask = asyncHandler(async (req, res) => {
     .findOneAndUpdate({ _id: taskId, project: projectId }, updateQuery, {
       new: true,
     })
-    .populate("assignedTo", "username avatar fullname");
+    .populate("assignedTo", "username avatar fullName");
 
   if (!updatedTask) throw new apiError(404, "Task not found in this project");
 
@@ -235,11 +240,15 @@ const getSubTask = asyncHandler(async (req, res) => {
       },
     },
     {
-      $addFields: {
+      $project: {
         subTasks: 1,
       },
     },
   ]);
+
+  if (!foundTask || foundTask.length === 0) {
+    throw new apiError(404, "task not found");
+  }
 
   return res
     .status(200)
@@ -279,7 +288,7 @@ const updateSubTask = asyncHandler(async (req, res) => {
   if (title !== undefined) updateFields.title = title;
   if (content !== undefined) updateFields.content = content;
 
-  const updatedSubTask = await subTask.findByIdAndUpdate(
+  const updatedSubTask = await subTask.findOneAndUpdate(
     {
       _id: new mongoose.Types.ObjectId(subTaskId),
       task: new mongoose.Types.ObjectId(taskId),

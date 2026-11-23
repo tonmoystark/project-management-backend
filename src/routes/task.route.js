@@ -7,6 +7,7 @@ import {
 } from "../middlewares/auth.middleware.js";
 
 import { validate } from "../middlewares/validator.middleware.js";
+import { upload } from "../middlewares/multer.middleware.js";
 import { availableUsers, userRolesEnum } from "../utils/constants.js";
 import {
   validateCreateSubTask,
@@ -33,12 +34,13 @@ router
   .route("/")
   .get(validateProjectPermission(availableUsers), getTasks)
   .post(
-    validateCreateTask(),
-    validate,
     validateProjectPermission([
       userRolesEnum.ADMIN,
       userRolesEnum.PROJECT_ADMIN,
     ]),
+    upload.array("attachments"),
+    validateCreateTask(),
+    validate,
     createTask,
   );
 
@@ -46,15 +48,13 @@ router
   .route("/:taskId")
   .get(validateProjectPermission(availableUsers), getTaskId)
   .put(
-    validateUpdateTask(),
-    validate,
-    validateProjectPermission([
-      userRolesEnum.ADMIN,
-      userRolesEnum.PROJECT_ADMIN,
-    ]),
+    validateProjectPermission(availableUsers),
     validateTaskPermission([userRolesEnum.ADMIN, userRolesEnum.PROJECT_ADMIN], {
       allowAssignee: true,
     }),
+    upload.array("attachments"),
+    validateUpdateTask(),
+    validate,
     updateTask,
   )
   .delete(
@@ -70,9 +70,12 @@ router
   .route("/:taskId/subtask")
   .get(validateProjectPermission(availableUsers), getSubTask)
   .post(
+    validateProjectPermission(availableUsers),
+    validateTaskPermission([userRolesEnum.ADMIN, userRolesEnum.PROJECT_ADMIN], {
+      allowAssignee: true,
+    }),
     validateCreateSubTask(),
     validate,
-    validateProjectPermission(),
     createSubTask,
   );
 

@@ -1,11 +1,11 @@
 import mongoose, { Schema } from "mongoose";
-import { availableTaskStatus, taskStatus } from "../utils/constants";
+import { availableTaskStatus, taskStatus } from "../utils/constants.js";
 
 const taskSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      require: true,
+      required: true,
       trim: true,
     },
     content: {
@@ -35,7 +35,7 @@ const taskSchema = new mongoose.Schema(
       type: [
         {
           url: String,
-          MimeType: String,
+         MimeType: String,
           size: Number,
         },
       ],

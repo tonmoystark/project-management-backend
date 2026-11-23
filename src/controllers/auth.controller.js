@@ -53,7 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   await user.save({ validateBeforeSave: false });
 
-  sendMail({
+  await sendMail({
     email: user?.email,
     subject: "Please verify your email address",
     mailgenContent: emailVerificationMailgenContent(
@@ -109,8 +109,8 @@ const login = asyncHandler(async (req, res) => {
   );
 
   const optionsForCookie = {
-    httponly: true,
-    secure: true,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
   };
 
   return res
@@ -141,7 +141,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
   };
 
   return res
@@ -209,7 +209,7 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
 
   await isLoggedinUser.save({ validateBeforeSave: false });
 
-  sendMail({
+  await sendMail({
     email: isLoggedinUser?.email,
     subject: "Please verify your email address",
     mailgenContent: emailVerificationMailgenContent(
@@ -223,8 +223,8 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, {}, "Verification email sent successfully"));
 });
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  const  incomingRefreshToken  =
-    req.cookies.refreshToken || req.body.refreshToken;
+  const incomingRefreshToken =
+    req.cookies?.refreshToken || req.body?.refreshToken;
 
   if (!incomingRefreshToken) {
     throw new apiError(401, "Access Unauthorized");
@@ -254,9 +254,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessandRefreshToken(
       user._id,
     );
-
-    user.refreshToken = refreshToken;
-    user.save();
 
     return res
       .status(200)

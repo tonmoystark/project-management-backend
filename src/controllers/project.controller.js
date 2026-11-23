@@ -23,20 +23,20 @@ const getProjects = asyncHandler(async (req, res) => {
         pipeline: [
           {
             $lookup: {
-              from: "projectMembers",
+              from: "projectmembers",
               localField: "_id",
               foreignField: "project",
               as: "projectMembers",
             },
           },
+          {
+            $addFields: {
+              members: {
+                $size: "$projectMembers",
+              },
+            },
+          },
         ],
-      },
-    },
-    {
-      $addFields: {
-        member: {
-          $size: "$projectMembers",
-        },
       },
     },
     {
@@ -45,12 +45,12 @@ const getProjects = asyncHandler(async (req, res) => {
     {
       $project: {
         project: {
-          id: 1,
-          name: 1,
-          description: 1,
-          members: 1,
-          createdAt: 1,
-          createdBy: 1,
+          _id: "$projects._id",
+          name: "$projects.name",
+          description: "$projects.description",
+          members: "$projects.members",
+          createdAt: "$projects.createdAt",
+          createdBy: "$projects.createdBy",
         },
         role: 1,
         _id: 0,
@@ -223,7 +223,7 @@ const updateMemberRole = asyncHandler(async (req, res) => {
 
   if (!foundProjectMember) throw new apiError(400, "project member not found");
 
-  const updatedRole = await foundProjectMember.findByIdAndUpdate(
+  const updatedRole = await projectMember.findByIdAndUpdate(
     foundProjectMember._id,
     {
       role: newRole,
@@ -249,9 +249,11 @@ const deleteMember = asyncHandler(async (req, res) => {
 
   if (!foundProjectMember) throw new apiError(400, "member not found");
 
-  const deleteMember = await projectMember.findByIdAndDelete(projectMember._id);
+  const deletedMember = await projectMember.findByIdAndDelete(
+    foundProjectMember._id,
+  );
 
-  if (!deleteMember) throw new apiError(400, "member not found");
+  if (!deletedMember) throw new apiError(400, "member not found");
 
   return res
     .status(200)

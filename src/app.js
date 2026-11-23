@@ -34,4 +34,16 @@ app.use("/api/v1/projects/:projectId/notes", noteRouter);
 
 app.get("/", (req, res) => res.send("Hello World!"));
 
+// global error handler
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  return res.status(statusCode).json({
+    statusCode,
+    message: err.message || "Internal Server Error",
+    errors: err.errors || [],
+    success: false,
+    data: null,
+  });
+});
+
 export default app;

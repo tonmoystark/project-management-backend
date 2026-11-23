@@ -156,7 +156,7 @@ export const validateUpdateTask = () => {
 export const validateCreateSubTask = () => {
   return [
     body("title").notEmpty().withMessage("title cannot be empty").trim(),
-    body("content").optional().trim(),
+    body("content").notEmpty().withMessage("content cannot be empty").trim(),
   ];
 };
 

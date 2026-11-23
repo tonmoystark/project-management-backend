@@ -19,7 +19,7 @@ import {
   validateCreateProject,
   validateUpdateMemberRole,
   validateUpdateProject,
-} from "../validators";
+} from "../validators/index.js";
 import { validate } from "../middlewares/validator.middleware.js";
 import { availableUsers, userRolesEnum } from "../utils/constants.js";
 
@@ -46,7 +46,10 @@ router
   .route("/:projectId/members")
   .get(validateProjectPermission(availableUsers), getProjectMembers)
   .post(
-    validateProjectPermission(availableUsers),
+    validateProjectPermission([
+      userRolesEnum.ADMIN,
+      userRolesEnum.PROJECT_ADMIN,
+    ]),
     validateAddMemberToProject(),
     validate,
     addMembersToProject,
