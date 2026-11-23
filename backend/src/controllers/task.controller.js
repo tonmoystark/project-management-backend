@@ -6,6 +6,10 @@ import mongoose from "mongoose";
 import { availableUsers, userRolesEnum } from "../utils/constants.js";
 import { task } from "../models/task.model.js";
 import { subTask } from "../models/subTask.model.js";
+import {
+  deleteFilesFromImageKit,
+  uploadFilesToImageKit,
+} from "../utils/imagekit.js";
 
 const getTasks = asyncHandler(async (req, res) => {
   const { projectId } = req.params;
@@ -110,17 +114,10 @@ const createTask = asyncHandler(async (req, res) => {
   if (!foundProject) throw new apiError(400, "project not found");
   const files = req.files || [];
 
-  const baseUrl =
-    process.env.SERVER_URL?.replace(/\/+$/, "") ||
-    `${req.protocol}://${req.get("host")}`;
-
-  const attatchments = files.map((file) => {
-    return {
-      url: `${baseUrl}/images/${encodeURIComponent(file.filename)}`,
-      MimeType: file.mimetype,
-      size: file.size,
-    };
-  });
+  const attatchments = await uploadFilesToImageKit(
+    files,
+    `/project-management/${projectId}/tasks`,
+  );
 
   const newTask = await task.create({
     name,
@@ -146,18 +143,11 @@ const updateTask = asyncHandler(async (req, res) => {
   const existingProject = await project.findById(projectId);
   if (!existingProject) throw new apiError(404, "Project not found");
 
-  const baseUrl =
-    process.env.SERVER_URL?.replace(/\/+$/, "") ||
-    `${req.protocol}://${req.get("host")}`;
-
   const files = req.files || [];
-  const newAttachments = files.map((file) => {
-    return {
-      url: `${baseUrl}/images/${encodeURIComponent(file.filename)}`,
-      MimeType: file.mimetype,
-      size: file.size,
-    };
-  });
+  const newAttachments = await uploadFilesToImageKit(
+    files,
+    `/project-management/${projectId}/tasks`,
+  );
 
   const updateData = {};
   if (name !== undefined) updateData.name = name;
@@ -214,10 +204,19 @@ const deleteTask = asyncHandler(async (req, res) => {
   const existingProject = await project.findById(projectId);
   if (!existingProject) throw new apiError(404, "project not found");
 
-  await task.findOneAndDelete({
+  const deletedTask = await task.findOneAndDelete({
     _id: taskId,
     project: projectId,
   });
+
+  if (!deletedTask) throw new apiError(404, "task not found");
+
+  const fileIds = (deletedTask.attatchments || [])
+    .map((item) => item.fileId)
+    .filter(Boolean);
+  if (fileIds.length > 0) {
+    await deleteFilesFromImageKit(fileIds);
+  }
 
   return res
     .status(200)

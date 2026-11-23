@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 
-const MAX_FILE_SIZE_BYTES = 1 * 1000 * 1000; // Matches backend Multer 1MB limit
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // Matches backend Multer 5MB limit
 
 interface TaskFormValues {
   name: string;
@@ -93,7 +93,7 @@ export const TaskFormModal = ({
 
     incoming.forEach((file) => {
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        toast.error(`"${file.name}" exceeds the 1MB size limit`);
+        toast.error(`"${file.name}" exceeds the 5MB size limit`);
       } else {
         validFiles.push(file);
       }
@@ -246,7 +246,7 @@ export const TaskFormModal = ({
         <FormField
           id="task-attachments"
           label={isEditing ? "Add attachments" : "Attachments"}
-          hint="Optional. Max 1MB per file."
+          hint="Optional. Max 5MB per file."
         >
           <label
             htmlFor="task-attachments"

@@ -35,7 +35,9 @@ const taskSchema = new mongoose.Schema(
       type: [
         {
           url: String,
-         MimeType: String,
+          fileId: String,
+          thumbnailUrl: String,
+          MimeType: String,
           size: Number,
         },
       ],

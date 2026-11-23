@@ -12,6 +12,8 @@ export interface TaskUser {
 export interface TaskAttachment {
   _id?: string;
   url: string;
+  fileId?: string;
+  thumbnailUrl?: string;
   MimeType?: string;
   mimetype?: string;
   size?: number;

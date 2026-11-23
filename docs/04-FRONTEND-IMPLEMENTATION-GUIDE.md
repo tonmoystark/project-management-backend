@@ -86,13 +86,13 @@ Create small, composable primitives early so every feature shares consistent sty
    - Add `createSubTask`, `updateSubTask`, `deleteSubTask`.
 2. **`ProjectTasksPage.tsx`**:
    - Board (`KanbanBoard` + `TaskCard`) and List (`TaskListTable`) toggle, search, status filter, and assignee filter.
-   - Show "New Task" button (`TaskFormModal`) to `admin` only; filter assignee dropdown to accepted members only; validate 1 MB max per file client-side.
+   - Show "New Task" button (`TaskFormModal`) to `admin` only; filter assignee dropdown to accepted members only; validate 5 MB max per file client-side.
 3. **`TaskDetailPage.tsx`** + **`TaskAttachments.tsx`** + **`SubTaskSection.tsx`**:
    - Enforce the 3 distinct permission flags:
      - `canManipulateTask` (`admin`) → Edit & Delete task buttons.
      - `canChangeStatus` (`admin`, `project_admin`, or task assignee) → inline Status dropdown calling `useUpdateTaskStatus`.
      - `canManageSubTasks` (`admin` or `project_admin`) → inline Add / Edit / Delete subtasks.
-   - Render `task.attatchments` via `TaskAttachments`: resolve relative URLs against the backend origin derived from `VITE_API_BASE_URL`, lazy-load `aspect-video` thumbnails with shimmer/fallback states, and provide a keyboard-accessible Lightbox viewer (Prev/Next, Escape, Download, Open in new tab).
+   - Render `task.attatchments` via `TaskAttachments`: apply ImageKit CDN transforms (`w-600,q-80,f-auto` thumbnails, `w-1600,q-85,f-auto` Lightbox) with fallback for legacy `/images/...` paths, lazy-load `aspect-video` thumbnails with shimmer/fallback states, and provide a keyboard-accessible Lightbox viewer (Prev/Next, Escape, Download, Open in new tab).
 
 ---
 

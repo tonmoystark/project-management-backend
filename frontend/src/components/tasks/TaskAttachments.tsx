@@ -67,9 +67,25 @@ const isImageAttachment = (file: TaskAttachment, resolvedUrl: string): boolean =
   return IMAGE_EXTENSIONS.test(resolvedUrl);
 };
 
+const isImageKitUrl = (url: string): boolean => {
+  try {
+    return new URL(url).hostname.includes("imagekit.io");
+  } catch {
+    return false;
+  }
+};
+
+const withImageKitTransform = (url: string, transform: string): string => {
+  if (!isImageKitUrl(url)) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}tr=${transform}`;
+};
+
 interface ResolvedAttachment {
   id: string;
   url: string;
+  thumbUrl: string;
+  lightboxUrl: string;
   name: string;
   size?: number;
   isImage: boolean;
@@ -102,7 +118,7 @@ const ImageThumbnailCard = ({ item, onOpen }: ImageThumbnailCardProps) => {
           </div>
         ) : (
           <img
-            src={item.url}
+            src={item.thumbUrl}
             alt={item.name}
             loading="lazy"
             decoding="async"
@@ -159,12 +175,17 @@ export const TaskAttachments = ({ attachments }: TaskAttachmentsProps) => {
 
   const resolvedItems: ResolvedAttachment[] = attachments.map((file, index) => {
     const url = resolveAttachmentUrl(file.url);
+    const isImage = isImageAttachment(file, url);
     return {
       id: file._id ?? `${url}-${index}`,
       url,
+      thumbUrl: isImage ? withImageKitTransform(url, "w-600,q-80,f-auto") : url,
+      lightboxUrl: isImage
+        ? withImageKitTransform(url, "w-1600,q-85,f-auto")
+        : url,
       name: getAttachmentFileName(url, index),
       size: file.size,
-      isImage: isImageAttachment(file, url),
+      isImage,
     };
   });
 
@@ -334,7 +355,7 @@ export const TaskAttachments = ({ attachments }: TaskAttachmentsProps) => {
               )}
 
               <img
-                src={activeImage.url}
+                src={activeImage.lightboxUrl}
                 alt={activeImage.name}
                 decoding="async"
                 className="max-h-[80vh] max-w-full rounded-lg object-contain shadow-2xl"

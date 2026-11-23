@@ -17,7 +17,7 @@ A multi-user **Project Management Backend API** built with **Node.js (ES Modules
 | Database & ODM | MongoDB + Mongoose 9 | Schema modeling, validation & aggregation pipelines |
 | Authentication | JWT (`jsonwebtoken`) + `bcrypt` + `cookie-parser` | Access/refresh tokens in `httpOnly` cookies + password hashing |
 | Validation | `express-validator` | Declarative request body validation |
-| File Uploads | `multer` (disk storage) + `express.static` | Task attachments (max 1 MB per file, URL-encoded, served from `/images` with 7-day cache + ETag) |
+| File Uploads & CDN | `multer` (`memoryStorage`) + `imagekit` | Task attachments (max 5 MB per file) streamed directly to ImageKit CDN, cleaned up on task delete |
 | Email Service | `mailgen` + `nodemailer` (Mailtrap Sandbox in dev) | Account verification & password reset emails |
 | Cross-Origin | `cors` (`credentials: true`) | Frontend SPA communication with cookies |
 
@@ -58,7 +58,7 @@ A multi-user **Project Management Backend API** built with **Node.js (ES Modules
 - `assignedTo` (ObjectId → `user`)
 - `assignedBy` (ObjectId → `user`)
 - `project` (ObjectId → `project`, required)
-- `attatchments` (`[{ url: String, MimeType: String, size: Number }]`, default `[]`)
+- `attatchments` (`[{ url: String, fileId: String, thumbnailUrl: String, MimeType: String, size: Number }]`, default `[]`)
 - `timestamps: true`
 
 ### 3.5 `SubTask` (`subtasks`)
@@ -148,7 +148,7 @@ Users **must** have an `"accepted"` membership in a project before accessing any
 | Method | Path | Permission | Body / Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/` | Any accepted member | Lists project tasks with populated `assignedTo` |
-| `POST` | `/` | `admin` | `multipart/form-data`: `name`, `content?`, `status`, `assignedTo`, `attachments[]` (max 1 MB each) |
+| `POST` | `/` | `admin` | `multipart/form-data`: `name`, `content?`, `status`, `assignedTo`, `attachments[]` (max 5 MB each, uploaded to ImageKit) |
 | `GET` | `/:taskId` | Any accepted member | Aggregates task with populated `assignedTo` and `subTasks` |
 | `PUT` | `/:taskId` | `admin` | `multipart/form-data`: full task update + append new `attachments[]` |
 | `PATCH` | `/:taskId/status` | `admin`, `project_admin`, or task assignee | `{ status }` — status-only progress update |
@@ -187,4 +187,8 @@ NODEMAILER_SMTP_PORT=2525
 NODEMAILER_SMTP_USER=...
 NODEMAILER_SMTP_PASS=...
 FORGOT_PASSWORD_REDIRECT_URL=http://localhost:5173/reset-password
+
+IMAGEKIT_PUBLIC_KEY=...
+IMAGEKIT_PRIVATE_KEY=...
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/<your_id>
 ```

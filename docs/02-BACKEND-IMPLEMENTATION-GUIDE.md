@@ -23,6 +23,7 @@ Build foundational helpers before writing business logic:
 - `src/utils/async-handler.js`: Wraps async route handlers to forward rejections to `next(err)`.
 - `src/utils/constants.js`: Single source of truth for enums (`userRolesEnum`, `taskStatus`, `memberStatusEnum`) and their `Object.values(...)` arrays.
 - `src/utils/mail.js`: Mailgen templates (`emailVerificationMailgenContent`, `forgotPasswordMailgenContent`) + Nodemailer `sendMail` using `generatePlaintext` for `text` and `generate` for `html`.
+- `src/utils/imagekit.js`: Lazy-initialized ImageKit SDK client (`uploadFileToImageKit`, `uploadFilesToImageKit`, `deleteFilesFromImageKit`) reading `IMAGEKIT_PUBLIC_KEY`, `IMAGEKIT_PRIVATE_KEY`, and `IMAGEKIT_URL_ENDPOINT`.
 
 ---
 
@@ -49,7 +50,7 @@ Build composable middlewares so controllers stay focused on business logic:
    - Confirms `:taskId` belongs to `:projectId`, attaches `req.task`, and allows either matching roles or (when enabled) the task's `assignedTo` user.
 4. **`validateNotePermission(allowedRoles)`**:
    - Confirms `:noteId` belongs to `:projectId`, attaches `req.note`, and allows only `foundNote.createdBy === req.user._id` (plus optional `allowedRoles`).
-5. **`upload`** (`multer.middleware.js`): Disk storage into `./public/images` naming files `${Date.now()}-${file.originalname}` with a 1 MB file size limit.
+5. **`upload`** (`multer.middleware.js`): Uses `multer.memoryStorage()` with a 5 MB per-file limit so file buffers stream straight to ImageKit without writing temporary files to disk.
 6. **`validate`** (`validator.middleware.js`) + **`src/validators/index.js`**: Express-validator chains using `.notEmpty()` (never `.isEmpty()`) and `validate` throwing `422` with extracted `{ [field]: message }` pairs.
 
 ---
@@ -83,7 +84,7 @@ Implement `task.controller.js` + `task.route.js`:
    - `PATCH /:taskId/status` → `ADMIN`, `PROJECT_ADMIN`, or task assignee (`allowAssignee: true`), updating **only** `{ $set: { status } }`.
    - `POST / PUT / DELETE` subtasks → `ADMIN` and `PROJECT_ADMIN` only.
 3. Use MongoDB aggregation in `getTaskId` and `getSubTask` to join `users` (`assignedTo`) and `subtasks` (`from: "subtasks"`).
-4. Build attachment URLs with `const baseUrl = process.env.SERVER_URL?.replace(/\/+$/, "") || `${req.protocol}://${req.get("host")}`;` and `encodeURIComponent(file.filename)` so URLs never save as relative `/images/...` paths.
+4. Upload task attachments via `uploadFilesToImageKit(files, "/project-management/<projectId>/tasks")` in `createTask` and `updateTask`, storing `url`, `fileId`, and `thumbnailUrl`; clean up stored ImageKit files with `deleteFilesFromImageKit(fileIds)` inside `deleteTask`.
 
 ---
 

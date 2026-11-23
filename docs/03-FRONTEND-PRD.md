@@ -99,11 +99,11 @@ A responsive, role-aware **React + TypeScript** Single Page Application (SPA) bu
 ### 5.5 Tasks, Attachments & Subtasks
 - **Board (Kanban)** grouped by `todo`, `in_progress`, and `done`, plus a **List** table toggle.
 - Client-side search, status filter, and assignee filter.
-- **Create / Edit Task Modal (`admin` only)**: title, description, status, accepted-member assignee dropdown, multi-file upload enforcing the 1 MB per-file Multer limit.
+- **Create / Edit Task Modal (`admin` only)**: title, description, status, accepted-member assignee dropdown, multi-file upload enforcing the 5 MB per-file limit.
 - **Task Detail Page**:
   - Quick status selector (`PATCH /:taskId/status`) for `admin`, `project_admin`, and the assigned `member`.
   - Edit & Delete controls for `admin` only.
-  - **Attachments Gallery (`TaskAttachments`)**: Resolves attachment URLs against the backend origin (supporting both full URLs and legacy relative `/images/...` paths), renders lazy-loaded `aspect-video` image thumbnails (`loading="lazy"`, `decoding="async"`, shimmer placeholder, error fallback) with a full-size **Lightbox modal** (Prev/Next + keyboard `←`/`→`/`Esc`, download, open in new tab), plus file cards for non-image attachments.
+  - **Attachments Gallery (`TaskAttachments`)**: Automatically applies ImageKit on-the-fly CDN transforms (`?tr=w-600,q-80,f-auto` for thumbnails, `?tr=w-1600,q-85,f-auto` for Lightbox, original URL for download), falls back cleanly for legacy local `/images/...` URLs, renders lazy-loaded `aspect-video` image thumbnails (`loading="lazy"`, `decoding="async"`, shimmer placeholder, error fallback) with a full-size **Lightbox modal** (Prev/Next + keyboard `←`/`→`/`Esc`, download, open in new tab), plus file cards for non-image attachments.
   - **Subtasks Section**: inline Add, Edit, and Delete for `admin` and `project_admin`; read-only for `member`.
 
 ### 5.6 Personal Project Notes
