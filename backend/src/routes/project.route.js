@@ -9,6 +9,9 @@ import {
   getProjectMembers,
   updateMemberRole,
   deleteMember,
+  getMyInvitations,
+  acceptInvitation,
+  rejectInvitation,
 } from "../controllers/project.controller.js";
 import {
   validateProjectPermission,
@@ -30,6 +33,10 @@ router
   .route("/")
   .get(getProjects)
   .post(validateCreateProject(), validate, createProject);
+
+router.route("/invitations").get(getMyInvitations);
+router.route("/invitations/:invitationId/accept").patch(acceptInvitation);
+router.route("/invitations/:invitationId/reject").patch(rejectInvitation);
 
 router
   .route("/:projectId")

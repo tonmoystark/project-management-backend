@@ -1,5 +1,10 @@
 import mongoose, { Schema } from "mongoose";
-import { availableUsers, userRolesEnum } from "../utils/constants.js";
+import {
+  availableMemberStatus,
+  availableUsers,
+  memberStatusEnum,
+  userRolesEnum,
+} from "../utils/constants.js";
 
 const projectMemberSchema = new mongoose.Schema(
   {
@@ -18,6 +23,16 @@ const projectMemberSchema = new mongoose.Schema(
       enum: availableUsers,
       required: true,
       default: userRolesEnum.MEMBER,
+    },
+    status: {
+      type: String,
+      enum: availableMemberStatus,
+      required: true,
+      default: memberStatusEnum.PENDING,
+    },
+    invitedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
     },
   },
   { timestamps: true },

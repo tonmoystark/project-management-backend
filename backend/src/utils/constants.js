@@ -13,3 +13,10 @@ export const taskStatus = {
 };
 
 export const availableTaskStatus = Object.values(taskStatus);
+
+export const memberStatusEnum = {
+  PENDING: "pending",
+  ACCEPTED: "accepted",
+};
+
+export const availableMemberStatus = Object.values(memberStatusEnum);

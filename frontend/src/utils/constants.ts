@@ -30,3 +30,11 @@ export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   in_progress: "In Progress",
   done: "Done",
 };
+
+export const MEMBER_STATUSES = {
+  PENDING: "pending",
+  ACCEPTED: "accepted",
+} as const;
+
+export type MemberStatus =
+  (typeof MEMBER_STATUSES)[keyof typeof MEMBER_STATUSES];

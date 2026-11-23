@@ -6,6 +6,7 @@ import { FolderKanban, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/Button";
 import { EmailVerifyBanner } from "@/components/layout/EmailVerifyBanner";
+import { NotificationsBell } from "@/components/layout/NotificationsBell";
 import { cn } from "@/lib/utils";
 
 export const AppShell = () => {
@@ -53,6 +54,8 @@ export const AppShell = () => {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            <NotificationsBell />
+
             <NavLink
               to="/profile"
               className={({ isActive }) =>

@@ -1,6 +1,6 @@
 import apiClient, { type ApiResponse } from "@/api/axios";
 import type { UserAvatar } from "@/api/auth.api";
-import type { UserRole } from "@/utils/constants";
+import type { MemberStatus, UserRole } from "@/utils/constants";
 
 export interface Project {
   _id: string;
@@ -31,9 +31,28 @@ export interface ProjectMemberUser {
 export interface ProjectMember {
   project: string;
   role?: UserRole;
+  status?: MemberStatus;
   user: ProjectMemberUser;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ProjectInvitation {
+  _id: string;
+  role: UserRole;
+  status: MemberStatus;
+  project: {
+    _id: string;
+    name: string;
+    description?: string;
+  };
+  invitedBy?: {
+    _id: string;
+    username: string;
+    fullName?: string;
+    avatar?: UserAvatar;
+  };
+  createdAt: string;
 }
 
 export interface CreateProjectPayload {
@@ -120,6 +139,27 @@ export const projectApi = {
     const { data } = await apiClient.delete<
       ApiResponse<Record<string, never>>
     >(`/projects/${projectId}/members/${userId}`);
+    return data;
+  },
+
+  getMyInvitations: async () => {
+    const { data } = await apiClient.get<ApiResponse<ProjectInvitation[]>>(
+      "/projects/invitations",
+    );
+    return data;
+  },
+
+  acceptInvitation: async (invitationId: string) => {
+    const { data } = await apiClient.patch<ApiResponse<ProjectMember>>(
+      `/projects/invitations/${invitationId}/accept`,
+    );
+    return data;
+  },
+
+  rejectInvitation: async (invitationId: string) => {
+    const { data } = await apiClient.patch<ApiResponse<Record<string, never>>>(
+      `/projects/invitations/${invitationId}/reject`,
+    );
     return data;
   },
 };

@@ -4,6 +4,7 @@ import { task } from "../models/task.model.js";
 import { note } from "../models/note.model.js";
 import { User } from "../models/user.model.js";
 import { apiError } from "../utils/api-error.js";
+import { memberStatusEnum } from "../utils/constants.js";
 import jwt from "jsonwebtoken";
 
 export const verifyJWT = async (req, res, next) => {
@@ -35,14 +36,22 @@ export const validateProjectPermission = (role = []) => {
   return async (req, res, next) => {
     const { projectId } = req.params;
 
-    if (!projectId) throw new apiError(400, "project not found");
+    if (!projectId || !mongoose.Types.ObjectId.isValid(projectId)) {
+      throw new apiError(400, "Invalid project ID");
+    }
 
     const projectDoc = await projectMember.findOne({
       project: new mongoose.Types.ObjectId(projectId),
       user: new mongoose.Types.ObjectId(req.user._id),
+      status: { $ne: memberStatusEnum.PENDING },
     });
 
-    if (!projectDoc) throw new apiError(400, "project not found");
+    if (!projectDoc) {
+      throw new apiError(
+        403,
+        "You do not have access to this project or your invitation is still pending",
+      );
+    }
 
     const givenRole = projectDoc?.role;
 

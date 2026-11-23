@@ -10,6 +10,7 @@ import {
 } from "@/hooks/useProjects";
 import {
   AVAILABLE_USER_ROLES,
+  MEMBER_STATUSES,
   ROLE_LABELS,
   USER_ROLES,
   type UserRole,
@@ -100,6 +101,11 @@ export const MemberTable = ({
                             {isSelf && (
                               <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                                 You
+                              </span>
+                            )}
+                            {member.status === MEMBER_STATUSES.PENDING && (
+                              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600">
+                                Pending invite
                               </span>
                             )}
                           </div>

@@ -72,8 +72,8 @@ export const AddMemberModal = ({
     <Modal
       open={open}
       onClose={handleClose}
-      title="Add team member"
-      description="Invite an existing registered user to this project by email."
+      title="Invite team member"
+      description="Send a project invitation by email. They will gain access once they accept."
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <FormField
@@ -122,9 +122,9 @@ export const AddMemberModal = ({
           <Button
             type="submit"
             isLoading={addMember.isPending}
-            loadingText="Adding..."
+            loadingText="Sending invite..."
           >
-            Add member
+            Send invite
           </Button>
         </div>
       </form>

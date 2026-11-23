@@ -12,6 +12,7 @@ import type { UserRole } from "@/utils/constants";
 
 export const projectKeys = {
   all: ["projects"] as const,
+  invitations: ["projects", "invitations"] as const,
   detail: (projectId: string) => ["projects", projectId] as const,
   members: (projectId: string) => ["projects", projectId, "members"] as const,
 };
@@ -158,6 +159,50 @@ export const useDeleteProjectMember = (projectId: string) => {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to remove member"));
+    },
+  });
+};
+
+export const useInvitations = () => {
+  return useQuery({
+    queryKey: projectKeys.invitations,
+    queryFn: async () => {
+      const response = await projectApi.getMyInvitations();
+      return response.data;
+    },
+    refetchInterval: 30_000,
+  });
+};
+
+export const useAcceptInvitation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (invitationId: string) =>
+      projectApi.acceptInvitation(invitationId),
+    onSuccess: (response) => {
+      toast.success(response.message || "Invitation accepted!");
+      void queryClient.invalidateQueries({ queryKey: projectKeys.invitations });
+      void queryClient.invalidateQueries({ queryKey: projectKeys.all });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to accept invitation"));
+    },
+  });
+};
+
+export const useRejectInvitation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (invitationId: string) =>
+      projectApi.rejectInvitation(invitationId),
+    onSuccess: (response) => {
+      toast.success(response.message || "Invitation declined");
+      void queryClient.invalidateQueries({ queryKey: projectKeys.invitations });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to decline invitation"));
     },
   });
 };

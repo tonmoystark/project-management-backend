@@ -9,6 +9,7 @@ import { useProjectMembers } from "@/hooks/useProjects";
 import { useCreateTask, useUpdateTask } from "@/hooks/useTasks";
 import {
   AVAILABLE_TASK_STATUSES,
+  MEMBER_STATUSES,
   TASK_STATUSES,
   TASK_STATUS_LABELS,
   type TaskStatus,
@@ -230,12 +231,14 @@ export const TaskFormModal = ({
               })}
             >
               <option value="">Select member...</option>
-              {members?.map((member) => (
-                <option key={member.user._id} value={member.user._id}>
-                  {member.user.fullName || member.user.username} (@
-                  {member.user.username})
-                </option>
-              ))}
+              {members
+                ?.filter((member) => member.status !== MEMBER_STATUSES.PENDING)
+                .map((member) => (
+                  <option key={member.user._id} value={member.user._id}>
+                    {member.user.fullName || member.user.username} (@
+                    {member.user.username})
+                  </option>
+                ))}
             </Select>
           </FormField>
         </div>
