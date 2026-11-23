@@ -103,7 +103,7 @@ A responsive, role-aware **React + TypeScript** Single Page Application (SPA) bu
 - **Task Detail Page**:
   - Quick status selector (`PATCH /:taskId/status`) for `admin`, `project_admin`, and the assigned `member`.
   - Edit & Delete controls for `admin` only.
-  - Attachments gallery (image thumbnails for `image/*`, file cards for documents) opening in a new tab.
+  - **Attachments Gallery (`TaskAttachments`)**: Resolves attachment URLs against the backend origin (supporting both full URLs and legacy relative `/images/...` paths), renders lazy-loaded `aspect-video` image thumbnails (`loading="lazy"`, `decoding="async"`, shimmer placeholder, error fallback) with a full-size **Lightbox modal** (Prev/Next + keyboard `←`/`→`/`Esc`, download, open in new tab), plus file cards for non-image attachments.
   - **Subtasks Section**: inline Add, Edit, and Delete for `admin` and `project_admin`; read-only for `member`.
 
 ### 5.6 Personal Project Notes
@@ -124,7 +124,7 @@ frontend/src/
 │   ├── profile/    # ChangePasswordForm
 │   ├── projects/   # ProjectCard, CreateProjectModal, ProjectWorkspaceLayout
 │   ├── members/    # MemberTable, AddMemberModal
-│   ├── tasks/      # StatusBadge, TaskCard, KanbanBoard, TaskListTable, TaskFormModal, SubTaskSection
+│   ├── tasks/      # StatusBadge, TaskCard, KanbanBoard, TaskListTable, TaskFormModal, TaskAttachments, SubTaskSection
 │   └── notes/      # NoteCard, NoteFormModal
 ├── context/        # AuthContext.tsx
 ├── hooks/          # useAuth.ts, useProjects.ts, useTasks.ts, useNotes.ts

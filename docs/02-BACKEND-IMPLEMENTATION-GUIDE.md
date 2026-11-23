@@ -8,7 +8,7 @@ This guide documents the step-by-step engineering workflow used to design, build
 1. Initialize Node with `"type": "module"` in `backend/package.json` and install core packages: `express`, `mongoose`, `dotenv`, `cors`, `cookie-parser`, `bcrypt`, `jsonwebtoken`, `express-validator`, `multer`, `mailgen`, `nodemailer`, and `nodemon`.
 2. Create `src/db/db.js` to connect to `process.env.MONGODB_URL` with clean failure exit (`process.exit(1)`).
 3. Create `src/app.js` with:
-   - `express.json({ limit: "16kb" })`, `express.urlencoded({ extended: true })`, `express.static("public")`, `cookieParser()`.
+   - `express.json({ limit: "16kb" })`, `express.urlencoded({ extended: true })`, `express.static(path.resolve(import.meta.dirname, "../public"), { maxAge: "7d", etag: true })`, `cookieParser()`.
    - `cors({ origin, credentials: true, methods, allowedHeaders })`.
    - Route mounts under `/api/v1/*`.
    - **Global JSON error-handling middleware** `(err, req, res, next)` at the very bottom so thrown `apiError` instances return structured JSON instead of HTML `500` pages.
@@ -83,6 +83,7 @@ Implement `task.controller.js` + `task.route.js`:
    - `PATCH /:taskId/status` → `ADMIN`, `PROJECT_ADMIN`, or task assignee (`allowAssignee: true`), updating **only** `{ $set: { status } }`.
    - `POST / PUT / DELETE` subtasks → `ADMIN` and `PROJECT_ADMIN` only.
 3. Use MongoDB aggregation in `getTaskId` and `getSubTask` to join `users` (`assignedTo`) and `subtasks` (`from: "subtasks"`).
+4. Build attachment URLs with `const baseUrl = process.env.SERVER_URL?.replace(/\/+$/, "") || `${req.protocol}://${req.get("host")}`;` and `encodeURIComponent(file.filename)` so URLs never save as relative `/images/...` paths.
 
 ---
 

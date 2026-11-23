@@ -17,7 +17,7 @@ A multi-user **Project Management Backend API** built with **Node.js (ES Modules
 | Database & ODM | MongoDB + Mongoose 9 | Schema modeling, validation & aggregation pipelines |
 | Authentication | JWT (`jsonwebtoken`) + `bcrypt` + `cookie-parser` | Access/refresh tokens in `httpOnly` cookies + password hashing |
 | Validation | `express-validator` | Declarative request body validation |
-| File Uploads | `multer` (disk storage) | Task attachments (max 1 MB per file, served via `/images`) |
+| File Uploads | `multer` (disk storage) + `express.static` | Task attachments (max 1 MB per file, URL-encoded, served from `/images` with 7-day cache + ETag) |
 | Email Service | `mailgen` + `nodemailer` (Mailtrap Sandbox in dev) | Account verification & password reset emails |
 | Cross-Origin | `cors` (`credentials: true`) | Frontend SPA communication with cookies |
 
