@@ -10,7 +10,7 @@ const sendMail = async (options) => {
     },
   });
 
-  const emailTextual = mailGenerator.generate(options.mailgenContent);
+  const emailTextual = mailGenerator.generatePlaintext(options.mailgenContent);
 
   const emailHtml = mailGenerator.generate(options.mailgenContent);
 
@@ -26,7 +26,7 @@ const sendMail = async (options) => {
   const mail = {
     from: "mail.projectmanagerv@example.com", // sender address
     to: options.email, // list of recipients
-    subject: options.email, // subject line
+    subject: options.subject, // subject line
     text: emailTextual, // plain text body
     html: emailHtml, // HTML body
   };

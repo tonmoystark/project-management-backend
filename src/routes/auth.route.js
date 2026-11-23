@@ -30,19 +30,19 @@ router.route("/verify-email/:verificationToken").get(verifyEmail);
 router.route("/refresh-token").post(refreshAccessToken);
 router
   .route("/forgot-password")
-  .post(validateForgotPassword(), forgotPasswordRequest);
+  .post(validateForgotPassword(), validate, forgotPasswordRequest);
 
 router
   .route("/reset-password/:token")
-  .post(validateResetPassword(), resetForgotPassword);
+  .post(validateResetPassword(), validate, resetForgotPassword);
 
 // secured routes
 
 router.route("/logout").post(verifyJWT, logoutUser);
-router.route("/current-user").post(verifyJWT, getCurrentUser);
+router.route("/current-user").get(verifyJWT, getCurrentUser);
 router
   .route("/change-password")
-  .post(validateChangePassword(), validate, changeCurrentPassword);
+  .post(verifyJWT, validateChangePassword(), validate, changeCurrentPassword);
 
 router
   .route("/resend-email-verification")
