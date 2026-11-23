@@ -3,6 +3,7 @@ import { toast } from "sonner";
 
 import {
   projectApi,
+  type AddMemberPayload,
   type CreateProjectPayload,
   type UpdateProjectPayload,
 } from "@/api/project.api";
@@ -90,6 +91,73 @@ export const useDeleteProject = () => {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to delete project"));
+    },
+  });
+};
+
+export const useProjectMembers = (projectId: string | undefined) => {
+  return useQuery({
+    queryKey: projectKeys.members(projectId ?? ""),
+    queryFn: async () => {
+      const response = await projectApi.getMembers(projectId!);
+      return response.data;
+    },
+    enabled: Boolean(projectId),
+  });
+};
+
+export const useAddProjectMember = (projectId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: AddMemberPayload) =>
+      projectApi.addMember(projectId, payload),
+    onSuccess: (response) => {
+      toast.success(response.message || "Member added successfully");
+      void queryClient.invalidateQueries({
+        queryKey: projectKeys.members(projectId),
+      });
+      void queryClient.invalidateQueries({ queryKey: projectKeys.all });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to add member"));
+    },
+  });
+};
+
+export const useUpdateMemberRole = (projectId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, newRole }: { userId: string; newRole: UserRole }) =>
+      projectApi.updateMemberRole(projectId, userId, newRole),
+    onSuccess: (response) => {
+      toast.success(response.message || "Member role updated");
+      void queryClient.invalidateQueries({
+        queryKey: projectKeys.members(projectId),
+      });
+      void queryClient.invalidateQueries({ queryKey: projectKeys.all });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to update member role"));
+    },
+  });
+};
+
+export const useDeleteProjectMember = (projectId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (userId: string) => projectApi.deleteMember(projectId, userId),
+    onSuccess: (response) => {
+      toast.success(response.message || "Member removed from project");
+      void queryClient.invalidateQueries({
+        queryKey: projectKeys.members(projectId),
+      });
+      void queryClient.invalidateQueries({ queryKey: projectKeys.all });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to remove member"));
     },
   });
 };
