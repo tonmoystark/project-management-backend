@@ -9,7 +9,7 @@ dotenv.config({
 const port = process.env.PORT || 3000;
 connectDB()
   .then(() => {
-    app.listen(port, () => {
+    app.listen(port, "0.0.0.0", () => {
       console.log(`listening on port ${port}`);
     });
   })
