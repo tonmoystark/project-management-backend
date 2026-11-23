@@ -5,9 +5,6 @@ import {
   AlertCircle,
   ArrowLeft,
   Calendar,
-  ExternalLink,
-  FileText,
-  Paperclip,
   Pencil,
   Trash2,
   User as UserIcon,
@@ -30,6 +27,7 @@ import { Modal } from "@/components/ui/Modal";
 import { StatusBadge } from "@/components/tasks/StatusBadge";
 import { TaskFormModal } from "@/components/tasks/TaskFormModal";
 import { SubTaskSection } from "@/components/tasks/SubTaskSection";
+import { TaskAttachments } from "@/components/tasks/TaskAttachments";
 
 const getAssigneeObj = (
   assignedTo: TaskUser | string | null | undefined,
@@ -228,58 +226,7 @@ const TaskDetailPage = () => {
         </div>
 
         {/* Attachments */}
-        {attachments.length > 0 && (
-          <div className="mt-6 border-t border-border pt-5">
-            <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-              <Paperclip className="h-3.5 w-3.5" />
-              Attachments ({attachments.length})
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {attachments.map((file, index) => {
-                const mime = file.MimeType || file.mimetype || "";
-                const isImage = mime.startsWith("image/");
-                const fileName =
-                  file.url.split("/").pop() || `Attachment ${index + 1}`;
-
-                return (
-                  <a
-                    key={file._id ?? `${file.url}-${index}`}
-                    href={file.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-3 transition-colors hover:border-primary/40 hover:bg-muted/60"
-                  >
-                    {isImage ? (
-                      <img
-                        src={file.url}
-                        alt={fileName}
-                        className="h-10 w-10 shrink-0 rounded border border-border object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted text-muted-foreground">
-                        <FileText className="h-5 w-5" />
-                      </div>
-                    )}
-
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-medium text-foreground group-hover:text-primary">
-                        {fileName}
-                      </p>
-                      {file.size !== undefined && (
-                        <p className="text-[11px] text-muted-foreground">
-                          {(file.size / 1024).toFixed(1)} KB
-                        </p>
-                      )}
-                    </div>
-
-                    <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground group-hover:text-foreground" />
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        <TaskAttachments attachments={attachments} />
       </section>
 
       {/* Subtasks */}

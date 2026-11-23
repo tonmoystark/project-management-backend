@@ -110,9 +110,13 @@ const createTask = asyncHandler(async (req, res) => {
   if (!foundProject) throw new apiError(400, "project not found");
   const files = req.files || [];
 
+  const baseUrl =
+    process.env.SERVER_URL?.replace(/\/+$/, "") ||
+    `${req.protocol}://${req.get("host")}`;
+
   const attatchments = files.map((file) => {
     return {
-      url: `${process.env.SERVER_URL}/images/${file.filename}`,
+      url: `${baseUrl}/images/${encodeURIComponent(file.filename)}`,
       MimeType: file.mimetype,
       size: file.size,
     };
@@ -142,10 +146,14 @@ const updateTask = asyncHandler(async (req, res) => {
   const existingProject = await project.findById(projectId);
   if (!existingProject) throw new apiError(404, "Project not found");
 
+  const baseUrl =
+    process.env.SERVER_URL?.replace(/\/+$/, "") ||
+    `${req.protocol}://${req.get("host")}`;
+
   const files = req.files || [];
   const newAttachments = files.map((file) => {
     return {
-      url: `${process.env.SERVER_URL}/images/${file.filename}`,
+      url: `${baseUrl}/images/${encodeURIComponent(file.filename)}`,
       MimeType: file.mimetype,
       size: file.size,
     };
