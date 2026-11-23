@@ -29,7 +29,7 @@ interface QueuedRequest {
   reject: (error: unknown) => void;
 }
 
-const API_BASE_URL = API_URL || "http://localhost:3000/api/v1";
+const API_BASE_URL = API_URL;
 
 // Auth endpoints that should not trigger an automatic token refresh on 401
 const AUTH_SKIP_REFRESH_PATHS = [
