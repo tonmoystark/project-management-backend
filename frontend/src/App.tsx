@@ -6,6 +6,8 @@ import { queryClient } from "@/lib/queryClient";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { PublicRoute } from "@/routes/PublicRoute";
+import { AppShell } from "@/components/layout/AppShell";
+import { ProjectWorkspaceLayout } from "@/components/projects/ProjectWorkspaceLayout";
 
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
@@ -46,16 +48,21 @@ function App() {
 
             {/* Protected routes */}
             <Route element={<ProtectedRoute />}>
-              <Route path="/projects" element={<ProjectPage />} />
-              <Route path="/projects/:projectId">
-                <Route index element={<Navigate to="tasks" replace />} />
-                <Route path="tasks" element={<ProjectTasksPage />} />
-                <Route path="tasks/:taskId" element={<TaskDetailPage />} />
-                <Route path="members" element={<ProjectMembersPage />} />
-                <Route path="notes" element={<ProjectNotesPage />} />
-                <Route path="settings" element={<ProjectSettingPage />} />
+              <Route element={<AppShell />}>
+                <Route path="/projects" element={<ProjectPage />} />
+                <Route
+                  path="/projects/:projectId"
+                  element={<ProjectWorkspaceLayout />}
+                >
+                  <Route index element={<Navigate to="tasks" replace />} />
+                  <Route path="tasks" element={<ProjectTasksPage />} />
+                  <Route path="tasks/:taskId" element={<TaskDetailPage />} />
+                  <Route path="members" element={<ProjectMembersPage />} />
+                  <Route path="notes" element={<ProjectNotesPage />} />
+                  <Route path="settings" element={<ProjectSettingPage />} />
+                </Route>
+                <Route path="/profile" element={<ProfilePage />} />
               </Route>
-              <Route path="/profile" element={<ProfilePage />} />
             </Route>
 
             {/* Default & fallback */}
