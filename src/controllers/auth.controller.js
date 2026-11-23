@@ -8,6 +8,7 @@ import {
   sendMail,
 } from "../utils/mail.js";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 const generateAccessandRefreshToken = async (userID) => {
   try {
@@ -40,7 +41,7 @@ const registerUser = asyncHandler(async (req, res) => {
     username,
     email,
     password,
-    isVerified: false,
+    isEmailVerified: false,
     role,
   });
 
@@ -179,7 +180,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
   user.emailVerificationToken = undefined;
   user.emailVerificationExpiry = undefined;
 
-  user.isVerified = true;
+  user.isEmailVerified = true;
 
   await user.save({ validateBeforeSave: false });
 
@@ -196,7 +197,7 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
     throw new apiError(404, "User not found");
   }
 
-  if (isLoggedinUser.isVerified) {
+  if (isLoggedinUser.isEmailVerified) {
     throw new apiError(400, "User is already verified");
   }
 
@@ -222,7 +223,7 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, {}, "Verification email sent successfully"));
 });
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  const { incomingRefreshToken } =
+  const  incomingRefreshToken  =
     req.cookies.refreshToken || req.body.refreshToken;
 
   if (!incomingRefreshToken) {
@@ -284,8 +285,8 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
   const { unHashedToken, hashedToken, expiryToken } =
     user.generateTemporaryToken();
 
-  user.passwordResetToken = hashedToken;
-  user.passwordResetExpiry = expiryToken;
+  user.forgotPasswordToken = hashedToken;
+  user.forgotPasswordExpiry = expiryToken;
 
   await user.save({ validateBeforeSave: false });
 
@@ -315,7 +316,7 @@ const resetForgotPassword = asyncHandler(async (req, res) => {
   });
 
   if (!user) {
-    throw new apiError(489, "Invalid or expired token");
+    throw new apiError(400, "Invalid or expired token");
   }
 
   user.forgotPasswordExpiry = undefined;
