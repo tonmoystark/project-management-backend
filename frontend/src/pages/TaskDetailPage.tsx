@@ -16,7 +16,7 @@ import {
 import type { TaskUser } from "@/api/task.api";
 import { getApiErrorMessage } from "@/api/axios";
 import { useAuth } from "@/hooks/useAuth";
-import { useDeleteTask, useTask, useUpdateTask } from "@/hooks/useTasks";
+import { useDeleteTask, useTask, useUpdateTaskStatus } from "@/hooks/useTasks";
 import { useProjectWorkspace } from "@/components/projects/ProjectWorkspaceLayout";
 import {
   AVAILABLE_TASK_STATUSES,
@@ -61,7 +61,7 @@ const TaskDetailPage = () => {
     error,
   } = useTask(project._id, taskId);
 
-  const updateTask = useUpdateTask(project._id, taskId ?? "");
+  const updateTaskStatus = useUpdateTaskStatus(project._id, taskId ?? "");
   const deleteTask = useDeleteTask(project._id);
 
   if (isLoading) {
@@ -94,19 +94,21 @@ const TaskDetailPage = () => {
   }
 
   const assignee = getAssigneeObj(task.assignedTo);
-  const isPrivileged =
-    role === USER_ROLES.ADMIN || role === USER_ROLES.PROJECT_ADMIN;
+  const isAdmin = role === USER_ROLES.ADMIN;
+  const isProjectAdmin = role === USER_ROLES.PROJECT_ADMIN;
   const isAssignee =
     Boolean(currentUser?._id) &&
     getAssigneeId(task.assignedTo) === currentUser?._id;
-  const canEdit = isPrivileged || isAssignee;
-  const canDelete = isPrivileged;
+
+  const canManipulateTask = isAdmin;
+  const canChangeStatus = isAdmin || isProjectAdmin || isAssignee;
+  const canManageSubTasks = isAdmin || isProjectAdmin;
 
   const attachments = task.attatchments ?? [];
   const subTasks = task.subTasks ?? [];
 
   const handleStatusChange = (newStatus: TaskStatus) => {
-    updateTask.mutate({ status: newStatus });
+    updateTaskStatus.mutate(newStatus);
   };
 
   const handleConfirmDelete = () => {
@@ -168,11 +170,11 @@ const TaskDetailPage = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {canEdit && (
+            {canChangeStatus && (
               <Select
                 aria-label="Change task status"
                 value={task.status}
-                disabled={updateTask.isPending}
+                disabled={updateTaskStatus.isPending}
                 onChange={(e) =>
                   handleStatusChange(e.target.value as TaskStatus)
                 }
@@ -186,7 +188,7 @@ const TaskDetailPage = () => {
               </Select>
             )}
 
-            {canEdit && (
+            {canManipulateTask && (
               <Button
                 type="button"
                 variant="outline"
@@ -198,7 +200,7 @@ const TaskDetailPage = () => {
               </Button>
             )}
 
-            {canDelete && (
+            {canManipulateTask && (
               <Button
                 type="button"
                 variant="destructive"
@@ -285,7 +287,7 @@ const TaskDetailPage = () => {
         projectId={project._id}
         taskId={task._id}
         subTasks={subTasks}
-        canManage={canEdit}
+        canManage={canManageSubTasks}
       />
 
       <TaskFormModal

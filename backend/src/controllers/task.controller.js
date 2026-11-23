@@ -178,6 +178,28 @@ const updateTask = asyncHandler(async (req, res) => {
     .status(200)
     .json(new apiResponse(200, updatedTask, "Task updated successfully"));
 });
+
+const updateTaskStatus = asyncHandler(async (req, res) => {
+  const { status } = req.body;
+  const { taskId, projectId } = req.params;
+
+  const updatedTask = await task
+    .findOneAndUpdate(
+      { _id: taskId, project: projectId },
+      { $set: { status } },
+      { new: true, runValidators: true },
+    )
+    .populate("assignedTo", "username avatar fullName");
+
+  if (!updatedTask) throw new apiError(404, "Task not found in this project");
+
+  return res
+    .status(200)
+    .json(
+      new apiResponse(200, updatedTask, "Task status updated successfully"),
+    );
+});
+
 const deleteTask = asyncHandler(async (req, res) => {
   const { taskId, projectId } = req.params;
 
@@ -324,6 +346,7 @@ export {
   getTaskId,
   createTask,
   updateTask,
+  updateTaskStatus,
   deleteTask,
   getSubTask,
   createSubTask,

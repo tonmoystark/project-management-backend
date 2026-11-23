@@ -153,6 +153,17 @@ export const validateUpdateTask = () => {
   ];
 };
 
+export const validateUpdateTaskStatus = () => {
+  return [
+    body("status")
+      .notEmpty()
+      .withMessage("status can not be empty")
+      .isIn(availableTaskStatus)
+      .withMessage("status is invalid")
+      .trim(),
+  ];
+};
+
 export const validateCreateSubTask = () => {
   return [
     body("title").notEmpty().withMessage("title cannot be empty").trim(),

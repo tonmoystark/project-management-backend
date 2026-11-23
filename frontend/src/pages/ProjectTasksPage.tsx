@@ -46,8 +46,7 @@ export const ProjectTasksPage = () => {
   } = useTasks(project._id);
   const { data: members } = useProjectMembers(project._id);
 
-  const canCreateTask =
-    role === USER_ROLES.ADMIN || role === USER_ROLES.PROJECT_ADMIN;
+  const canCreateTask = role === USER_ROLES.ADMIN;
 
   const filteredTasks = useMemo(() => {
     if (!tasks) return [];

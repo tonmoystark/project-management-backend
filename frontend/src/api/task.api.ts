@@ -130,6 +130,18 @@ export const taskApi = {
     return data;
   },
 
+  updateStatus: async (
+    projectId: string,
+    taskId: string,
+    status: TaskStatus,
+  ) => {
+    const { data } = await apiClient.patch<ApiResponse<Task>>(
+      `/projects/${projectId}/tasks/${taskId}/status`,
+      { status },
+    );
+    return data;
+  },
+
   delete: async (projectId: string, taskId: string) => {
     const { data } = await apiClient.delete<
       ApiResponse<Record<string, never>>

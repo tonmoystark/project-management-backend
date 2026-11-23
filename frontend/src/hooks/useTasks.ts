@@ -9,6 +9,7 @@ import {
   type UpdateTaskPayload,
 } from "@/api/task.api";
 import { getApiErrorMessage } from "@/api/axios";
+import type { TaskStatus } from "@/utils/constants";
 
 export const taskKeys = {
   list: (projectId: string) => ["projects", projectId, "tasks"] as const,
@@ -76,6 +77,27 @@ export const useUpdateTask = (projectId: string, taskId: string) => {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to update task"));
+    },
+  });
+};
+
+export const useUpdateTaskStatus = (projectId: string, taskId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (status: TaskStatus) =>
+      taskApi.updateStatus(projectId, taskId, status),
+    onSuccess: (response) => {
+      toast.success(response.message || "Task status updated");
+      void queryClient.invalidateQueries({
+        queryKey: taskKeys.list(projectId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: taskKeys.detail(projectId, taskId),
+      });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to update task status"));
     },
   });
 };
