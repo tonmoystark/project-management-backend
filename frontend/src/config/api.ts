@@ -1,0 +1,1 @@
+export const API_URL = "https://project-management-backend-t6sq.onrender.com/api/v1"
