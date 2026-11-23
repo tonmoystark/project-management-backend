@@ -12,17 +12,7 @@ import {
 } from "lucide-react";
 
 import type { TaskAttachment } from "@/api/task.api";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1";
-
-const BACKEND_ORIGIN = (() => {
-  try {
-    return new URL(API_BASE_URL).origin;
-  } catch {
-    return "http://localhost:3000";
-  }
-})();
+import { BACKEND_ORIGIN } from "@/config/api";
 
 const IMAGE_EXTENSIONS = /\.(png|jpe?g|gif|webp|avif|svg|bmp)$/i;
 

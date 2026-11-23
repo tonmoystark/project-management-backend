@@ -10,6 +10,15 @@ import {
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
+const isCrossSiteProduction = () =>
+  process.env.NODE_ENV === "production" || Boolean(process.env.RENDER);
+
+const getCookieOptions = () => ({
+  httpOnly: true,
+  secure: isCrossSiteProduction(),
+  sameSite: isCrossSiteProduction() ? "none" : "lax",
+});
+
 const generateAccessandRefreshToken = async (userID) => {
   try {
     const user = await User.findById(userID);
@@ -108,10 +117,7 @@ const login = asyncHandler(async (req, res) => {
     "-password -emailVerificationToken -emailVerificationExpiry",
   );
 
-  const optionsForCookie = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-  };
+  const optionsForCookie = getCookieOptions();
 
   return res
     .status(200)
@@ -139,10 +145,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     },
   );
 
-  const options = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-  };
+  const options = getCookieOptions();
 
   return res
     .status(200)
@@ -246,10 +249,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       throw new apiError(401, "Token invalid");
     }
 
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
+    const options = getCookieOptions();
 
     const { accessToken, refreshToken } = await generateAccessandRefreshToken(
       user._id,

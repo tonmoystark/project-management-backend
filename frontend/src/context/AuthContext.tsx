@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { authApi, type LoginPayload, type User } from "@/api/auth.api";
-import { setUnauthorizedHandler } from "@/api/axios";
+import { setUnauthorizedHandler, tokenStorage } from "@/api/axios";
 import { queryClient } from "@/lib/queryClient";
 
 export interface AuthContextValue {
@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     setUnauthorizedHandler(() => {
+      tokenStorage.clear();
       setUser(null);
       queryClient.clear();
     });
@@ -51,6 +52,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = useCallback(async (payload: LoginPayload) => {
     const response = await authApi.login(payload);
+    tokenStorage.setTokens(
+      response.data.accessToken,
+      response.data.refreshToken,
+    );
     setUser(response.data.user);
     return response.data.user;
   }, []);
@@ -59,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await authApi.logout();
     } finally {
+      tokenStorage.clear();
       setUser(null);
       queryClient.clear();
     }
