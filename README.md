@@ -1,0 +1,1 @@
+For a complete overview of the project, please refer to the documentation file. It covers the project in detail, including the backend architecture, frontend implementation, key features, and the technologies and approaches used throughout development.
